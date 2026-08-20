@@ -25,16 +25,53 @@ export class UserError extends Error {
   }
 }
 
-export async function getActiveUsers(): Promise<UserListItem[]> {
-  const query = `
-    SELECT id, phone, name, note, created_at, updated_at
-    FROM users
-    WHERE deleted_at IS NULL
-    ORDER BY id DESC
-  `;
+export interface ListUsersFilter {
+  phone?: string;
+}
 
-  const result = await pool.query<UserListItem>(query);
+export async function getActiveUsers(
+  filter: ListUsersFilter = {}
+): Promise<UserListItem[]> {
+  const conditions: string[] = ["deleted_at IS NULL"];
+  const params: unknown[] = [];
+
+  const phone = filter.phone?.trim();
+  if (phone) {
+    params.push(phone);
+    conditions.push(`phone = $${params.length}`);
+  }
+
+  const result = await pool.query<UserListItem>(
+    `
+      SELECT id, phone, name, note, created_at, updated_at
+      FROM users
+      WHERE ${conditions.join(" AND ")}
+      ORDER BY id DESC
+    `,
+    params
+  );
   return result.rows;
+}
+
+export async function getActiveUserByPhone(
+  phone: string
+): Promise<UserListItem | null> {
+  const normalized = (phone || "").trim();
+  if (!normalized) {
+    throw new UserError(400, "phone is required");
+  }
+
+  const result = await pool.query<UserListItem>(
+    `
+      SELECT id, phone, name, note, created_at, updated_at
+      FROM users
+      WHERE phone = $1
+        AND deleted_at IS NULL
+      LIMIT 1
+    `,
+    [normalized]
+  );
+  return result.rows[0] ?? null;
 }
 
 export async function getActiveUserById(

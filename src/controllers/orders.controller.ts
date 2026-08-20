@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import {
   OrderError,
+  assertActiveOrderExists,
   createOrder,
   getActiveOrderById,
   getActiveOrders,
@@ -8,7 +9,9 @@ import {
   softDeleteOrder,
   updateOrder,
   updateOrderPaymentStatus,
+  updateOrderStatus,
 } from "../services/orders.service";
+import { getOrderLogsByOrderId } from "../services/order_log.service";
 
 function parseIdParam(value: string): number | null {
   const id = Number(value);
@@ -33,19 +36,36 @@ function handleOrderError(
   next(error);
 }
 
+function firstQueryValue(value: unknown): string | undefined {
+  if (Array.isArray(value)) {
+    return value[0] !== undefined ? String(value[0]) : undefined;
+  }
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+  return String(value);
+}
+
 export async function getOrdersController(
-  _req: Request,
+  req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> {
   try {
-    const orders = await getActiveOrders();
+    const orders = await getActiveOrders({
+      ticket_no: firstQueryValue(req.query.ticket_no),
+      status: firstQueryValue(req.query.status),
+      payment_status: firstQueryValue(req.query.payment_status),
+      phone: firstQueryValue(req.query.phone),
+      date_from: firstQueryValue(req.query.date_from),
+      date_to: firstQueryValue(req.query.date_to),
+    });
     res.status(200).json({
       success: true,
       data: orders,
     });
   } catch (error) {
-    next(error);
+    handleOrderError(error, res, next);
   }
 }
 
@@ -79,6 +99,32 @@ export async function getOrderByIdController(
     });
   } catch (error) {
     next(error);
+  }
+}
+
+export async function getOrderLogsController(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const id = parseIdParam(req.params.id);
+    if (id === null) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid id",
+      });
+      return;
+    }
+
+    await assertActiveOrderExists(id);
+    const logs = await getOrderLogsByOrderId(id);
+    res.status(200).json({
+      success: true,
+      data: logs,
+    });
+  } catch (error) {
+    handleOrderError(error, res, next);
   }
 }
 
@@ -153,6 +199,34 @@ export async function updateOrderPaymentStatusController(
 
     const order = await updateOrderPaymentStatus(id, {
       payment_status: req.body?.payment_status,
+      adminId: req.admin?.adminId ?? null,
+    });
+    res.status(200).json({
+      success: true,
+      data: order,
+    });
+  } catch (error) {
+    handleOrderError(error, res, next);
+  }
+}
+
+export async function updateOrderStatusController(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const id = parseIdParam(req.params.id);
+    if (id === null) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid id",
+      });
+      return;
+    }
+
+    const order = await updateOrderStatus(id, {
+      status: req.body?.status,
       adminId: req.admin?.adminId ?? null,
     });
     res.status(200).json({

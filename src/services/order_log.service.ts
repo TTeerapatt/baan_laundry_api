@@ -68,6 +68,25 @@ export async function getActiveOrderLogById(
   return result.rows[0] ?? null;
 }
 
+export async function getOrderLogsByOrderId(
+  orderId: number
+): Promise<OrderLogListItem[]> {
+  const id = parsePositiveId(orderId, "order_id");
+  const result = await pool.query<OrderLogListItem>(
+    `
+      SELECT
+        id, order_id, admin_id, from_status, to_status,
+        action, message, created_at, updated_at
+      FROM order_log
+      WHERE order_id = $1
+        AND deleted_at IS NULL
+      ORDER BY id ASC
+    `,
+    [id]
+  );
+  return result.rows;
+}
+
 export async function createOrderLog(
   input: CreateOrderLogInput
 ): Promise<OrderLogListItem> {

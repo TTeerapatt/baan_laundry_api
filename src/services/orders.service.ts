@@ -27,6 +27,17 @@ export interface OrderListItem {
   note: string | null;
   created_at: string;
   updated_at: string;
+  user_phone?: string | null;
+  user_name?: string | null;
+}
+
+export interface ListOrdersFilter {
+  ticket_no?: string;
+  status?: string;
+  payment_status?: string;
+  phone?: string;
+  date_from?: string;
+  date_to?: string;
 }
 
 export interface OrderItemListItem {
@@ -74,6 +85,11 @@ export interface UpdateOrderInput {
 
 export interface UpdateOrderPaymentStatusInput {
   payment_status: string;
+  adminId?: number | null;
+}
+
+export interface UpdateOrderStatusInput {
+  status: string;
   adminId?: number | null;
 }
 
@@ -278,27 +294,106 @@ async function getOrderRow(
   const result = await db.query<OrderListItem>(
     `
       SELECT
-        id, ticket_no, user_id, admin_id, status, payment_status,
-        subtotal, discount, total, note, created_at, updated_at
-      FROM orders
-      WHERE id = $1
-        AND deleted_at IS NULL
+        o.id, o.ticket_no, o.user_id, o.admin_id, o.status, o.payment_status,
+        o.subtotal, o.discount, o.total, o.note, o.created_at, o.updated_at,
+        u.phone AS user_phone,
+        u.name AS user_name
+      FROM orders o
+      LEFT JOIN users u
+        ON u.id = o.user_id
+       AND u.deleted_at IS NULL
+      WHERE o.id = $1
+        AND o.deleted_at IS NULL
     `,
     [id]
   );
   return result.rows[0] ?? null;
 }
 
-export async function getActiveOrders(): Promise<OrderListItem[]> {
+function parseOptionalDate(
+  value: string | undefined,
+  field: string
+): string | null {
+  if (value === undefined || String(value).trim() === "") {
+    return null;
+  }
+  const raw = String(value).trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    throw new OrderError(400, `${field} must be YYYY-MM-DD`);
+  }
+  const date = new Date(`${raw}T00:00:00.000Z`);
+  if (Number.isNaN(date.getTime())) {
+    throw new OrderError(400, `${field} is invalid`);
+  }
+  return raw;
+}
+
+export async function getActiveOrders(
+  filter: ListOrdersFilter = {}
+): Promise<OrderListItem[]> {
+  const conditions: string[] = ["o.deleted_at IS NULL"];
+  const params: unknown[] = [];
+
+  const ticketNo = filter.ticket_no?.trim();
+  if (ticketNo) {
+    params.push(`%${ticketNo}%`);
+    conditions.push(`o.ticket_no ILIKE $${params.length}`);
+  }
+
+  const status = filter.status?.trim();
+  if (status) {
+    if (!ORDER_STATUSES.includes(status as OrderStatus)) {
+      throw new OrderError(
+        400,
+        "status must be one of: received, processing, ready, completed, cancelled"
+      );
+    }
+    params.push(status);
+    conditions.push(`o.status = $${params.length}`);
+  }
+
+  const paymentStatus = filter.payment_status?.trim();
+  if (paymentStatus) {
+    if (!PAYMENT_STATUSES.includes(paymentStatus as PaymentStatus)) {
+      throw new OrderError(400, "payment_status must be one of: unpaid, paid");
+    }
+    params.push(paymentStatus);
+    conditions.push(`o.payment_status = $${params.length}`);
+  }
+
+  const phone = filter.phone?.trim();
+  if (phone) {
+    params.push(phone);
+    conditions.push(`u.phone = $${params.length}`);
+  }
+
+  const dateFrom = parseOptionalDate(filter.date_from, "date_from");
+  if (dateFrom) {
+    params.push(dateFrom);
+    conditions.push(`o.created_at >= $${params.length}::date`);
+  }
+
+  const dateTo = parseOptionalDate(filter.date_to, "date_to");
+  if (dateTo) {
+    params.push(dateTo);
+    conditions.push(`o.created_at < ($${params.length}::date + INTERVAL '1 day')`);
+  }
+
   const result = await pool.query<OrderListItem>(
     `
       SELECT
-        id, ticket_no, user_id, admin_id, status, payment_status,
-        subtotal, discount, total, note, created_at, updated_at
-      FROM orders
-      WHERE deleted_at IS NULL
-      ORDER BY id DESC
-    `
+        o.id, o.ticket_no, o.user_id, o.admin_id, o.status, o.payment_status,
+        o.subtotal, o.discount, o.total, o.note, o.created_at, o.updated_at,
+        u.phone AS user_phone,
+        u.name AS user_name
+      FROM orders o
+      LEFT JOIN users u
+        ON u.id = o.user_id
+       AND u.deleted_at IS NULL
+      WHERE ${conditions.join(" AND ")}
+      ORDER BY o.id DESC
+    `,
+    params
   );
   return result.rows;
 }
@@ -312,6 +407,13 @@ export async function getActiveOrderById(
   }
   const items = await getOrderItemsByOrderId(id);
   return { ...order, items };
+}
+
+export async function assertActiveOrderExists(id: number): Promise<void> {
+  const order = await getOrderRow(id);
+  if (!order) {
+    throw new OrderError(404, "Order not found");
+  }
 }
 
 async function assertActiveUser(client: PoolClient, userId: number): Promise<void> {
@@ -574,6 +676,65 @@ export async function updateOrderPaymentStatus(
       toStatus: nextPaymentStatus,
       action: "payment_change",
       message: `Payment changed from ${existing.payment_status} to ${nextPaymentStatus}`,
+    });
+
+    const saved = await getOrderRow(id, client);
+    const savedItems = await getOrderItemsByOrderId(id, client);
+    await client.query("COMMIT");
+    return { ...(saved as OrderListItem), items: savedItems };
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+export async function updateOrderStatus(
+  id: number,
+  input: UpdateOrderStatusInput
+): Promise<OrderDetail> {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const existing = await getOrderRow(id, client);
+    if (!existing) {
+      throw new OrderError(404, "Order not found");
+    }
+
+    const nextStatus = String(input.status ?? "").trim();
+    if (!ORDER_STATUSES.includes(nextStatus as OrderStatus)) {
+      throw new OrderError(
+        400,
+        "status must be one of: received, processing, ready, completed, cancelled"
+      );
+    }
+
+    if (nextStatus === existing.status) {
+      const items = await getOrderItemsByOrderId(id, client);
+      await client.query("COMMIT");
+      return { ...existing, items };
+    }
+
+    await client.query(
+      `
+        UPDATE orders
+        SET status = $1
+        WHERE id = $2
+          AND deleted_at IS NULL
+      `,
+      [nextStatus, id]
+    );
+
+    await insertOrderLog(client, {
+      orderId: id,
+      adminId: input.adminId ?? null,
+      fromStatus: existing.status,
+      toStatus: nextStatus,
+      action: "status_change",
+      message: `Status changed from ${existing.status} to ${nextStatus}`,
     });
 
     const saved = await getOrderRow(id, client);

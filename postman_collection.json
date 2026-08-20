@@ -107,6 +107,22 @@
           "response": []
         },
         {
+          "name": "GET User By Phone",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users?phone=0812345678",
+              "host": ["{{base_url}}"],
+              "path": ["users"],
+              "query": [
+                { "key": "phone", "value": "0812345678" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "GET User By ID",
           "request": {
             "method": "GET",
@@ -476,11 +492,45 @@
           "response": []
         },
         {
+          "name": "GET Search Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders?ticket_no=BL-&status=received&payment_status=unpaid&phone=0812345678&date_from=2026-08-01&date_to=2026-08-31",
+              "host": ["{{base_url}}"],
+              "path": ["orders"],
+              "query": [
+                { "key": "ticket_no", "value": "BL-" },
+                { "key": "status", "value": "received" },
+                { "key": "payment_status", "value": "unpaid" },
+                { "key": "phone", "value": "0812345678" },
+                { "key": "date_from", "value": "2026-08-01" },
+                { "key": "date_to", "value": "2026-08-31" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "GET Order By ID",
           "request": {
             "method": "GET",
             "header": [],
             "url": { "raw": "{{base_url}}/orders/{{order_id}}", "host": ["{{base_url}}"], "path": ["orders", "{{order_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Order Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders/{{order_id}}/logs",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "{{order_id}}", "logs"]
+            }
           },
           "response": []
         },
@@ -497,6 +547,26 @@
               "raw": "{\n  \"status\": \"processing\",\n  \"payment_status\": \"unpaid\",\n  \"discount\": 0,\n  \"note\": \"กำลังซัก\"\n}"
             },
             "url": { "raw": "{{base_url}}/orders/{{order_id}}", "host": ["{{base_url}}"], "path": ["orders", "{{order_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH Update Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"processing\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/orders/{{order_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "{{order_id}}", "status"]
+            }
           },
           "response": []
         },

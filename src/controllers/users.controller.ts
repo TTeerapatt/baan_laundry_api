@@ -33,18 +33,27 @@ function handleUserError(
 }
 
 export async function getUsersController(
-  _req: Request,
+  req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> {
   try {
-    const users = await getActiveUsers();
+    const phoneRaw = req.query.phone;
+    const phone = Array.isArray(phoneRaw)
+      ? phoneRaw[0] !== undefined
+        ? String(phoneRaw[0])
+        : undefined
+      : phoneRaw !== undefined
+        ? String(phoneRaw)
+        : undefined;
+
+    const users = await getActiveUsers({ phone });
     res.status(200).json({
       success: true,
       data: users,
     });
   } catch (error) {
-    next(error);
+    handleUserError(error, res, next);
   }
 }
 
