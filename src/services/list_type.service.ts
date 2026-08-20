@@ -2,6 +2,7 @@ import pool from "../config/database.config";
 
 export interface ListTypeListItem {
   id: number;
+  code: string;
   name: string;
   size: string;
   created_at: string;
@@ -10,7 +11,7 @@ export interface ListTypeListItem {
 
 export async function getActiveListTypes(): Promise<ListTypeListItem[]> {
   const query = `
-    SELECT id, name, size, created_at, updated_at
+    SELECT id, code, name, size, created_at, updated_at
     FROM list_type
     WHERE deleted_at IS NULL
     ORDER BY id DESC
