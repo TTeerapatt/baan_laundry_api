@@ -1,8 +1,12 @@
 import { Router } from "express";
-import { getOrderLogsController } from "../controllers/order_log.controller";
+import {
+  getOrderLogByIdController,
+  getOrderLogsController,
+} from "../controllers/order_log.controller";
 
 const orderLogRouter = Router();
 
 orderLogRouter.get("/", getOrderLogsController);
+orderLogRouter.get("/:id", getOrderLogByIdController);
 
 export default orderLogRouter;

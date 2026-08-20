@@ -1,0 +1,219 @@
+{
+  "info": {
+    "_postman_id": "0e6f6b70-2367-4b4d-a3c8-26a5e4dbb7ee",
+    "name": "Baan Laundry API",
+    "description": "Collection for Baan Laundry API endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3001/laundry/api" },
+    { "key": "user_id", "value": "1" },
+    { "key": "admin_id", "value": "1" },
+    { "key": "service_type_id", "value": "1" },
+    { "key": "list_type_id", "value": "1" },
+    { "key": "list_price_id", "value": "1" },
+    { "key": "order_id", "value": "1" },
+    { "key": "order_item_id", "value": "1" },
+    { "key": "order_log_id", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/health", "host": ["{{base_url}}"], "path": ["health"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "GET All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/users", "host": ["{{base_url}}"], "path": ["users"] }
+          },
+          "response": []
+        },
+        {
+          "name": "GET User By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/users/{{user_id}}", "host": ["{{base_url}}"], "path": ["users", "{{user_id}}"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admins",
+      "item": [
+        {
+          "name": "GET All Admins",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/admins", "host": ["{{base_url}}"], "path": ["admins"] }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Admin By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/admins/{{admin_id}}", "host": ["{{base_url}}"], "path": ["admins", "{{admin_id}}"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Service Type",
+      "item": [
+        {
+          "name": "GET All Service Type",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/service-type", "host": ["{{base_url}}"], "path": ["service-type"] }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Service Type By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/service-type/{{service_type_id}}", "host": ["{{base_url}}"], "path": ["service-type", "{{service_type_id}}"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "List Type",
+      "item": [
+        {
+          "name": "GET All List Type",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/list-type", "host": ["{{base_url}}"], "path": ["list-type"] }
+          },
+          "response": []
+        },
+        {
+          "name": "GET List Type By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/list-type/{{list_type_id}}", "host": ["{{base_url}}"], "path": ["list-type", "{{list_type_id}}"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "List Price",
+      "item": [
+        {
+          "name": "GET All List Price",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/list-price", "host": ["{{base_url}}"], "path": ["list-price"] }
+          },
+          "response": []
+        },
+        {
+          "name": "GET List Price By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/list-price/{{list_price_id}}", "host": ["{{base_url}}"], "path": ["list-price", "{{list_price_id}}"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "GET All Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/orders", "host": ["{{base_url}}"], "path": ["orders"] }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Order By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/orders/{{order_id}}", "host": ["{{base_url}}"], "path": ["orders", "{{order_id}}"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Order Items",
+      "item": [
+        {
+          "name": "GET All Order Items",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/order-items", "host": ["{{base_url}}"], "path": ["order-items"] }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Order Item By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/order-items/{{order_item_id}}", "host": ["{{base_url}}"], "path": ["order-items", "{{order_item_id}}"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Order Log",
+      "item": [
+        {
+          "name": "GET All Order Log",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/order-log", "host": ["{{base_url}}"], "path": ["order-log"] }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Order Log By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/order-log/{{order_log_id}}", "host": ["{{base_url}}"], "path": ["order-log", "{{order_log_id}}"] }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

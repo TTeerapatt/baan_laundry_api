@@ -20,3 +20,17 @@ export async function getActiveUsers(): Promise<UserListItem[]> {
   const result = await pool.query<UserListItem>(query);
   return result.rows;
 }
+
+export async function getActiveUserById(
+  id: number
+): Promise<UserListItem | null> {
+  const query = `
+    SELECT id, phone, name, note, created_at, updated_at
+    FROM users
+    WHERE id = $1
+      AND deleted_at IS NULL
+  `;
+
+  const result = await pool.query<UserListItem>(query, [id]);
+  return result.rows[0] ?? null;
+}

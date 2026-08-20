@@ -27,3 +27,19 @@ export async function getActiveOrderItems(): Promise<OrderItemListItem[]> {
   const result = await pool.query<OrderItemListItem>(query);
   return result.rows;
 }
+
+export async function getActiveOrderItemById(
+  id: number
+): Promise<OrderItemListItem | null> {
+  const query = `
+    SELECT
+      id, order_id, service_type_id, list_type_id, list_price_id,
+      qty, unit_price, line_total, note, created_at, updated_at
+    FROM order_items
+    WHERE id = $1
+      AND deleted_at IS NULL
+  `;
+
+  const result = await pool.query<OrderItemListItem>(query, [id]);
+  return result.rows[0] ?? null;
+}

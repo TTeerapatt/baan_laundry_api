@@ -20,3 +20,17 @@ export async function getActiveAdmins(): Promise<AdminListItem[]> {
   const result = await pool.query<AdminListItem>(query);
   return result.rows;
 }
+
+export async function getActiveAdminById(
+  id: number
+): Promise<AdminListItem | null> {
+  const query = `
+    SELECT id, email, display_name, role, created_at, updated_at
+    FROM admins
+    WHERE id = $1
+      AND deleted_at IS NULL
+  `;
+
+  const result = await pool.query<AdminListItem>(query, [id]);
+  return result.rows[0] ?? null;
+}
