@@ -19,3 +19,17 @@ export async function getActiveServiceTypes(): Promise<ServiceTypeListItem[]> {
   const result = await pool.query<ServiceTypeListItem>(query);
   return result.rows;
 }
+
+export async function getActiveServiceTypeById(
+  id: number
+): Promise<ServiceTypeListItem | null> {
+  const query = `
+    SELECT id, code, name, created_at, updated_at
+    FROM service_type
+    WHERE id = $1
+      AND deleted_at IS NULL
+  `;
+
+  const result = await pool.query<ServiceTypeListItem>(query, [id]);
+  return result.rows[0] ?? null;
+}

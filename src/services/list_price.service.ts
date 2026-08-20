@@ -20,3 +20,17 @@ export async function getActiveListPrices(): Promise<ListPriceListItem[]> {
   const result = await pool.query<ListPriceListItem>(query);
   return result.rows;
 }
+
+export async function getActiveListPriceById(
+  id: number
+): Promise<ListPriceListItem | null> {
+  const query = `
+    SELECT id, service_type_id, list_type_id, unit_price, created_at, updated_at
+    FROM list_price
+    WHERE id = $1
+      AND deleted_at IS NULL
+  `;
+
+  const result = await pool.query<ListPriceListItem>(query, [id]);
+  return result.rows[0] ?? null;
+}

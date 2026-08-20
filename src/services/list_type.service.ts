@@ -20,3 +20,17 @@ export async function getActiveListTypes(): Promise<ListTypeListItem[]> {
   const result = await pool.query<ListTypeListItem>(query);
   return result.rows;
 }
+
+export async function getActiveListTypeById(
+  id: number
+): Promise<ListTypeListItem | null> {
+  const query = `
+    SELECT id, code, name, size, created_at, updated_at
+    FROM list_type
+    WHERE id = $1
+      AND deleted_at IS NULL
+  `;
+
+  const result = await pool.query<ListTypeListItem>(query, [id]);
+  return result.rows[0] ?? null;
+}

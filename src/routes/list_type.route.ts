@@ -1,8 +1,12 @@
 import { Router } from "express";
-import { getListTypesController } from "../controllers/list_type.controller";
+import {
+  getListTypeByIdController,
+  getListTypesController,
+} from "../controllers/list_type.controller";
 
 const listTypeRouter = Router();
 
 listTypeRouter.get("/", getListTypesController);
+listTypeRouter.get("/:id", getListTypeByIdController);
 
 export default listTypeRouter;
