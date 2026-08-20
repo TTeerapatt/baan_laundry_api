@@ -220,6 +220,22 @@
       "name": "Service Type",
       "item": [
         {
+          "name": "POST Create Service Type",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"fold\",\n  \"name\": \"พับ\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/service-type", "host": ["{{base_url}}"], "path": ["service-type"] }
+          },
+          "response": []
+        },
+        {
           "name": "GET All Service Type",
           "request": {
             "method": "GET",
@@ -234,6 +250,44 @@
             "method": "GET",
             "header": [],
             "url": { "raw": "{{base_url}}/service-type/{{service_type_id}}", "host": ["{{base_url}}"], "path": ["service-type", "{{service_type_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT Update Service Type",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"fold\",\n  \"name\": \"พับเสื้อผ้า\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/service-type/{{service_type_id}}", "host": ["{{base_url}}"], "path": ["service-type", "{{service_type_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Soft Delete Service Type",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/service-type/{{service_type_id}}", "host": ["{{base_url}}"], "path": ["service-type", "{{service_type_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Hard Delete Service Type",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/service-type/{{service_type_id}}/hard", "host": ["{{base_url}}"], "path": ["service-type", "{{service_type_id}}", "hard"] }
           },
           "response": []
         }
