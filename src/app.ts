@@ -50,8 +50,8 @@ app.use(`${API_PREFIX}/order-log`, orderLogRouter);
 const PORT = Number(process.env.PORT) || 3001;
 
 app.listen(PORT, () => {
-  console.log("----------------------------------------------------------------");
+  console.log("--------------------------------------------------------");
   console.log(`Server running on http://localhost:${PORT}${API_PREFIX}`);
   console.log(`Check health on http://localhost:${PORT}${API_PREFIX}/health`);
-  console.log("----------------------------------------------------------------");
+  console.log("--------------------------------------------------------");
 });
