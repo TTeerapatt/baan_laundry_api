@@ -12,8 +12,8 @@ import { authMiddleware } from "../middleware/auth.middleware";
 const orderItemsRouter = Router();
 
 orderItemsRouter.post("/", authMiddleware, createOrderItemController);
-orderItemsRouter.get("/", getOrderItemsController);
-orderItemsRouter.get("/:id", getOrderItemByIdController);
+orderItemsRouter.get("/", authMiddleware, getOrderItemsController);
+orderItemsRouter.get("/:id", authMiddleware, getOrderItemByIdController);
 orderItemsRouter.put("/:id", authMiddleware, updateOrderItemController);
 orderItemsRouter.delete("/:id/hard", authMiddleware, hardDeleteOrderItemController);
 orderItemsRouter.delete("/:id", authMiddleware, softDeleteOrderItemController);

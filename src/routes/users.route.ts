@@ -12,8 +12,8 @@ import { authMiddleware } from "../middleware/auth.middleware";
 const usersRouter = Router();
 
 usersRouter.post("/", authMiddleware, createUserController);
-usersRouter.get("/", getUsersController);
-usersRouter.get("/:id", getUserByIdController);
+usersRouter.get("/", authMiddleware, getUsersController);
+usersRouter.get("/:id", authMiddleware, getUserByIdController);
 usersRouter.put("/:id", authMiddleware, updateUserController);
 usersRouter.delete("/:id/hard", authMiddleware, hardDeleteUserController);
 usersRouter.delete("/:id", authMiddleware, softDeleteUserController);

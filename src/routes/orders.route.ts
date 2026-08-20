@@ -15,9 +15,9 @@ import { authMiddleware } from "../middleware/auth.middleware";
 const ordersRouter = Router();
 
 ordersRouter.post("/", authMiddleware, createOrderController);
-ordersRouter.get("/", getOrdersController);
-ordersRouter.get("/:id/logs", getOrderLogsController);
-ordersRouter.get("/:id", getOrderByIdController);
+ordersRouter.get("/", authMiddleware, getOrdersController);
+ordersRouter.get("/:id/logs", authMiddleware, getOrderLogsController);
+ordersRouter.get("/:id", authMiddleware, getOrderByIdController);
 ordersRouter.patch(
   "/:id/status",
   authMiddleware,

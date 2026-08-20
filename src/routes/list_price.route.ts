@@ -12,8 +12,8 @@ import { authMiddleware } from "../middleware/auth.middleware";
 const listPriceRouter = Router();
 
 listPriceRouter.post("/", authMiddleware, createListPriceController);
-listPriceRouter.get("/", getListPricesController);
-listPriceRouter.get("/:id", getListPriceByIdController);
+listPriceRouter.get("/", authMiddleware, getListPricesController);
+listPriceRouter.get("/:id", authMiddleware, getListPriceByIdController);
 listPriceRouter.put("/:id", authMiddleware, updateListPriceController);
 listPriceRouter.delete("/:id/hard", authMiddleware, hardDeleteListPriceController);
 listPriceRouter.delete("/:id", authMiddleware, softDeleteListPriceController);

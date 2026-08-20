@@ -12,8 +12,8 @@ import { authMiddleware } from "../middleware/auth.middleware";
 const serviceTypeRouter = Router();
 
 serviceTypeRouter.post("/", authMiddleware, createServiceTypeController);
-serviceTypeRouter.get("/", getServiceTypesController);
-serviceTypeRouter.get("/:id", getServiceTypeByIdController);
+serviceTypeRouter.get("/", authMiddleware, getServiceTypesController);
+serviceTypeRouter.get("/:id", authMiddleware, getServiceTypeByIdController);
 serviceTypeRouter.put("/:id", authMiddleware, updateServiceTypeController);
 serviceTypeRouter.delete(
   "/:id/hard",

@@ -10,8 +10,8 @@ import { authMiddleware } from "../middleware/auth.middleware";
 
 const adminsRouter = Router();
 
-adminsRouter.get("/", getAdminsController);
-adminsRouter.get("/:id", getAdminByIdController);
+adminsRouter.get("/", authMiddleware, getAdminsController);
+adminsRouter.get("/:id", authMiddleware, getAdminByIdController);
 adminsRouter.put("/:id", authMiddleware, updateAdminController);
 adminsRouter.delete("/:id/hard", authMiddleware, hardDeleteAdminController);
 adminsRouter.delete("/:id", authMiddleware, softDeleteAdminController);

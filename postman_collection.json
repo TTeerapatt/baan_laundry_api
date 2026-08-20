@@ -101,7 +101,9 @@
           "name": "GET All Users",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
             "url": { "raw": "{{base_url}}/users", "host": ["{{base_url}}"], "path": ["users"] }
           },
           "response": []
@@ -110,7 +112,9 @@
           "name": "GET User By Phone",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
             "url": {
               "raw": "{{base_url}}/users?phone=0812345678",
               "host": ["{{base_url}}"],
@@ -126,7 +130,9 @@
           "name": "GET User By ID",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
             "url": { "raw": "{{base_url}}/users/{{user_id}}", "host": ["{{base_url}}"], "path": ["users", "{{user_id}}"] }
           },
           "response": []
@@ -178,7 +184,9 @@
           "name": "GET All Admins",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
             "url": { "raw": "{{base_url}}/admins", "host": ["{{base_url}}"], "path": ["admins"] }
           },
           "response": []
@@ -187,7 +195,9 @@
           "name": "GET Admin By ID",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
             "url": { "raw": "{{base_url}}/admins/{{admin_id}}", "host": ["{{base_url}}"], "path": ["admins", "{{admin_id}}"] }
           },
           "response": []
@@ -255,7 +265,9 @@
           "name": "GET All Service Type",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
             "url": { "raw": "{{base_url}}/service-type", "host": ["{{base_url}}"], "path": ["service-type"] }
           },
           "response": []
@@ -264,7 +276,9 @@
           "name": "GET Service Type By ID",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
             "url": { "raw": "{{base_url}}/service-type/{{service_type_id}}", "host": ["{{base_url}}"], "path": ["service-type", "{{service_type_id}}"] }
           },
           "response": []
@@ -332,7 +346,9 @@
           "name": "GET All List Type",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
             "url": { "raw": "{{base_url}}/list-type", "host": ["{{base_url}}"], "path": ["list-type"] }
           },
           "response": []
@@ -341,7 +357,9 @@
           "name": "GET List Type By ID",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
             "url": { "raw": "{{base_url}}/list-type/{{list_type_id}}", "host": ["{{base_url}}"], "path": ["list-type", "{{list_type_id}}"] }
           },
           "response": []
@@ -409,7 +427,9 @@
           "name": "GET All List Price",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
             "url": { "raw": "{{base_url}}/list-price", "host": ["{{base_url}}"], "path": ["list-price"] }
           },
           "response": []
@@ -418,7 +438,9 @@
           "name": "GET List Price By ID",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
             "url": { "raw": "{{base_url}}/list-price/{{list_price_id}}", "host": ["{{base_url}}"], "path": ["list-price", "{{list_price_id}}"] }
           },
           "response": []
@@ -486,7 +508,9 @@
           "name": "GET All Orders",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
             "url": { "raw": "{{base_url}}/orders", "host": ["{{base_url}}"], "path": ["orders"] }
           },
           "response": []
@@ -495,7 +519,9 @@
           "name": "GET Search Orders",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
             "url": {
               "raw": "{{base_url}}/orders?ticket_no=BL-&status=received&payment_status=unpaid&phone=0812345678&date_from=2026-08-01&date_to=2026-08-31",
               "host": ["{{base_url}}"],
@@ -516,7 +542,9 @@
           "name": "GET Order By ID",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
             "url": { "raw": "{{base_url}}/orders/{{order_id}}", "host": ["{{base_url}}"], "path": ["orders", "{{order_id}}"] }
           },
           "response": []
@@ -525,7 +553,9 @@
           "name": "GET Order Logs",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
             "url": {
               "raw": "{{base_url}}/orders/{{order_id}}/logs",
               "host": ["{{base_url}}"],
@@ -637,7 +667,9 @@
           "name": "GET All Order Items",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
             "url": { "raw": "{{base_url}}/order-items", "host": ["{{base_url}}"], "path": ["order-items"] }
           },
           "response": []
@@ -646,7 +678,9 @@
           "name": "GET Order Item By ID",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
             "url": { "raw": "{{base_url}}/order-items/{{order_item_id}}", "host": ["{{base_url}}"], "path": ["order-items", "{{order_item_id}}"] }
           },
           "response": []
@@ -714,7 +748,9 @@
           "name": "GET All Order Log",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
             "url": { "raw": "{{base_url}}/order-log", "host": ["{{base_url}}"], "path": ["order-log"] }
           },
           "response": []
@@ -723,46 +759,10 @@
           "name": "GET Order Log By ID",
           "request": {
             "method": "GET",
-            "header": [],
-            "url": { "raw": "{{base_url}}/order-log/{{order_log_id}}", "host": ["{{base_url}}"], "path": ["order-log", "{{order_log_id}}"] }
-          },
-          "response": []
-        },
-        {
-          "name": "PUT Update Order Log",
-          "request": {
-            "method": "PUT",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"action\": \"note\",\n  \"message\": \"อัปเดตหมายเหตุ\"\n}"
-            },
-            "url": { "raw": "{{base_url}}/order-log/{{order_log_id}}", "host": ["{{base_url}}"], "path": ["order-log", "{{order_log_id}}"] }
-          },
-          "response": []
-        },
-        {
-          "name": "DELETE Soft Delete Order Log",
-          "request": {
-            "method": "DELETE",
             "header": [
               { "key": "Authorization", "value": "Bearer {{token}}" }
             ],
             "url": { "raw": "{{base_url}}/order-log/{{order_log_id}}", "host": ["{{base_url}}"], "path": ["order-log", "{{order_log_id}}"] }
-          },
-          "response": []
-        },
-        {
-          "name": "DELETE Hard Delete Order Log",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" }
-            ],
-            "url": { "raw": "{{base_url}}/order-log/{{order_log_id}}/hard", "host": ["{{base_url}}"], "path": ["order-log", "{{order_log_id}}", "hard"] }
           },
           "response": []
         }

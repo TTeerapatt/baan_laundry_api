@@ -4,9 +4,6 @@ import {
   createOrderLog,
   getActiveOrderLogById,
   getActiveOrderLogs,
-  hardDeleteOrderLog,
-  softDeleteOrderLog,
-  updateOrderLog,
 } from "../services/order_log.service";
 
 function parseIdParam(value: string): number | null {
@@ -87,99 +84,27 @@ export async function createOrderLogController(
   next: NextFunction
 ): Promise<void> {
   try {
+    // API ภายนอก append ได้เฉพาะ note — status/payment change เกิดจากระบบเท่านั้น
+    const action = String(req.body?.action ?? "note").trim() || "note";
+    if (action !== "note") {
+      res.status(400).json({
+        success: false,
+        message: "Only action \"note\" is allowed via API",
+      });
+      return;
+    }
+
     const log = await createOrderLog({
       order_id: req.body?.order_id,
-      action: req.body?.action,
-      from_status: req.body?.from_status,
-      to_status: req.body?.to_status,
+      action: "note",
+      from_status: null,
+      to_status: null,
       message: req.body?.message,
       adminId: req.admin?.adminId ?? null,
     });
     res.status(201).json({
       success: true,
       data: log,
-    });
-  } catch (error) {
-    handleOrderError(error, res, next);
-  }
-}
-
-export async function updateOrderLogController(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
-  try {
-    const id = parseIdParam(req.params.id);
-    if (id === null) {
-      res.status(400).json({
-        success: false,
-        message: "Invalid id",
-      });
-      return;
-    }
-
-    const log = await updateOrderLog(id, {
-      action: req.body?.action,
-      from_status: req.body?.from_status,
-      to_status: req.body?.to_status,
-      message: req.body?.message,
-    });
-    res.status(200).json({
-      success: true,
-      data: log,
-    });
-  } catch (error) {
-    handleOrderError(error, res, next);
-  }
-}
-
-export async function softDeleteOrderLogController(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
-  try {
-    const id = parseIdParam(req.params.id);
-    if (id === null) {
-      res.status(400).json({
-        success: false,
-        message: "Invalid id",
-      });
-      return;
-    }
-
-    const log = await softDeleteOrderLog(id);
-    res.status(200).json({
-      success: true,
-      message: "Order log soft deleted",
-      data: log,
-    });
-  } catch (error) {
-    handleOrderError(error, res, next);
-  }
-}
-
-export async function hardDeleteOrderLogController(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
-  try {
-    const id = parseIdParam(req.params.id);
-    if (id === null) {
-      res.status(400).json({
-        success: false,
-        message: "Invalid id",
-      });
-      return;
-    }
-
-    const result = await hardDeleteOrderLog(id);
-    res.status(200).json({
-      success: true,
-      message: "Order log hard deleted",
-      data: result,
     });
   } catch (error) {
     handleOrderError(error, res, next);
