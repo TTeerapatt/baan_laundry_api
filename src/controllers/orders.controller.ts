@@ -7,6 +7,7 @@ import {
   hardDeleteOrder,
   softDeleteOrder,
   updateOrder,
+  updateOrderPaymentStatus,
 } from "../services/orders.service";
 
 function parseIdParam(value: string): number | null {
@@ -124,6 +125,34 @@ export async function updateOrderController(
       payment_status: req.body?.payment_status,
       discount: req.body?.discount,
       note: req.body?.note,
+      adminId: req.admin?.adminId ?? null,
+    });
+    res.status(200).json({
+      success: true,
+      data: order,
+    });
+  } catch (error) {
+    handleOrderError(error, res, next);
+  }
+}
+
+export async function updateOrderPaymentStatusController(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const id = parseIdParam(req.params.id);
+    if (id === null) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid id",
+      });
+      return;
+    }
+
+    const order = await updateOrderPaymentStatus(id, {
+      payment_status: req.body?.payment_status,
       adminId: req.admin?.adminId ?? null,
     });
     res.status(200).json({

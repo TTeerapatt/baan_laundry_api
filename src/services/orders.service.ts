@@ -72,6 +72,11 @@ export interface UpdateOrderInput {
   adminId?: number | null;
 }
 
+export interface UpdateOrderPaymentStatusInput {
+  payment_status: string;
+  adminId?: number | null;
+}
+
 export class OrderError extends Error {
   constructor(
     public statusCode: number,
@@ -514,6 +519,62 @@ export async function updateOrder(
         message: `Payment changed from ${existing.payment_status} to ${nextPaymentStatus}`,
       });
     }
+
+    const saved = await getOrderRow(id, client);
+    const savedItems = await getOrderItemsByOrderId(id, client);
+    await client.query("COMMIT");
+    return { ...(saved as OrderListItem), items: savedItems };
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+export async function updateOrderPaymentStatus(
+  id: number,
+  input: UpdateOrderPaymentStatusInput
+): Promise<OrderDetail> {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const existing = await getOrderRow(id, client);
+    if (!existing) {
+      throw new OrderError(404, "Order not found");
+    }
+
+    const nextPaymentStatus = String(input.payment_status ?? "").trim();
+    if (!PAYMENT_STATUSES.includes(nextPaymentStatus as PaymentStatus)) {
+      throw new OrderError(400, "payment_status must be one of: unpaid, paid");
+    }
+
+    if (nextPaymentStatus === existing.payment_status) {
+      const items = await getOrderItemsByOrderId(id, client);
+      await client.query("COMMIT");
+      return { ...existing, items };
+    }
+
+    await client.query(
+      `
+        UPDATE orders
+        SET payment_status = $1
+        WHERE id = $2
+          AND deleted_at IS NULL
+      `,
+      [nextPaymentStatus, id]
+    );
+
+    await insertOrderLog(client, {
+      orderId: id,
+      adminId: input.adminId ?? null,
+      fromStatus: existing.payment_status,
+      toStatus: nextPaymentStatus,
+      action: "payment_change",
+      message: `Payment changed from ${existing.payment_status} to ${nextPaymentStatus}`,
+    });
 
     const saved = await getOrderRow(id, client);
     const savedItems = await getOrderItemsByOrderId(id, client);

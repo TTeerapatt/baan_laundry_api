@@ -501,6 +501,26 @@
           "response": []
         },
         {
+          "name": "PATCH Update Payment Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"payment_status\": \"paid\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/orders/{{order_id}}/payment-status",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "{{order_id}}", "payment-status"]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "DELETE Soft Delete Order",
           "request": {
             "method": "DELETE",
