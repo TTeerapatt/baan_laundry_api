@@ -9,6 +9,22 @@ export interface UserListItem {
   updated_at: string;
 }
 
+export interface CreateUserInput {
+  phone: string;
+  name: string;
+  note?: string;
+}
+
+export class UserError extends Error {
+  constructor(
+    public statusCode: number,
+    message: string
+  ) {
+    super(message);
+    this.name = "UserError";
+  }
+}
+
 export async function getActiveUsers(): Promise<UserListItem[]> {
   const query = `
     SELECT id, phone, name, note, created_at, updated_at
@@ -33,4 +49,154 @@ export async function getActiveUserById(
 
   const result = await pool.query<UserListItem>(query, [id]);
   return result.rows[0] ?? null;
+}
+
+export async function createUser(input: CreateUserInput): Promise<UserListItem> {
+  const phone = (input.phone || "").trim();
+  const name = (input.name || "").trim();
+  const note = input.note?.trim() || null;
+
+  if (!phone) {
+    throw new UserError(400, "phone is required");
+  }
+  if (!name) {
+    throw new UserError(400, "name is required");
+  }
+
+  const duplicate = await pool.query<{ id: number }>(
+    `
+      SELECT id
+      FROM users
+      WHERE phone = $1
+        AND deleted_at IS NULL
+      LIMIT 1
+    `,
+    [phone]
+  );
+
+  if (duplicate.rows.length > 0) {
+    throw new UserError(409, "Phone already exists");
+  }
+
+  const result = await pool.query<UserListItem>(
+    `
+      INSERT INTO users (phone, name, note)
+      VALUES ($1, $2, $3)
+      RETURNING id, phone, name, note, created_at, updated_at
+    `,
+    [phone, name, note]
+  );
+
+  return result.rows[0];
+}
+
+export interface UpdateUserInput {
+  phone?: string;
+  name?: string;
+  note?: string | null;
+}
+
+export async function updateUser(
+  id: number,
+  input: UpdateUserInput
+): Promise<UserListItem> {
+  const existing = await getActiveUserById(id);
+  if (!existing) {
+    throw new UserError(404, "User not found");
+  }
+
+  const nextPhone =
+    input.phone !== undefined ? input.phone.trim() : existing.phone;
+  const nextName =
+    input.name !== undefined ? input.name.trim() : existing.name;
+  const nextNote =
+    input.note !== undefined
+      ? input.note === null || String(input.note).trim() === ""
+        ? null
+        : String(input.note).trim()
+      : existing.note;
+
+  if (input.phone !== undefined && !nextPhone) {
+    throw new UserError(400, "phone is required");
+  }
+  if (input.name !== undefined && !nextName) {
+    throw new UserError(400, "name is required");
+  }
+
+  if (nextPhone !== existing.phone) {
+    const duplicate = await pool.query<{ id: number }>(
+      `
+        SELECT id
+        FROM users
+        WHERE phone = $1
+          AND id <> $2
+          AND deleted_at IS NULL
+        LIMIT 1
+      `,
+      [nextPhone, id]
+    );
+    if (duplicate.rows.length > 0) {
+      throw new UserError(409, "Phone already exists");
+    }
+  }
+
+  const result = await pool.query<UserListItem>(
+    `
+      UPDATE users
+      SET phone = $1,
+          name = $2,
+          note = $3
+      WHERE id = $4
+        AND deleted_at IS NULL
+      RETURNING id, phone, name, note, created_at, updated_at
+    `,
+    [nextPhone, nextName, nextNote, id]
+  );
+
+  return result.rows[0];
+}
+
+export async function softDeleteUser(id: number): Promise<UserListItem> {
+  const result = await pool.query<UserListItem>(
+    `
+      UPDATE users
+      SET deleted_at = NOW()
+      WHERE id = $1
+        AND deleted_at IS NULL
+      RETURNING id, phone, name, note, created_at, updated_at
+    `,
+    [id]
+  );
+
+  if (result.rows.length === 0) {
+    throw new UserError(404, "User not found");
+  }
+
+  return result.rows[0];
+}
+
+export async function hardDeleteUser(id: number): Promise<{ id: number }> {
+  const found = await pool.query<{ id: number }>(
+    `SELECT id FROM users WHERE id = $1 LIMIT 1`,
+    [id]
+  );
+
+  if (found.rows.length === 0) {
+    throw new UserError(404, "User not found");
+  }
+
+  const relatedOrders = await pool.query<{ id: number }>(
+    `SELECT id FROM orders WHERE user_id = $1 LIMIT 1`,
+    [id]
+  );
+
+  if (relatedOrders.rows.length > 0) {
+    throw new UserError(
+      409,
+      "Cannot hard delete user because orders still exist"
+    );
+  }
+
+  await pool.query(`DELETE FROM users WHERE id = $1`, [id]);
+  return { id };
 }

@@ -1,5 +1,13 @@
 import type { Request, Response, NextFunction } from "express";
-import { getActiveUserById, getActiveUsers } from "../services/users.service";
+import {
+  UserError,
+  createUser,
+  getActiveUserById,
+  getActiveUsers,
+  hardDeleteUser,
+  softDeleteUser,
+  updateUser,
+} from "../services/users.service";
 
 function parseIdParam(value: string): number | null {
   const id = Number(value);
@@ -7,6 +15,21 @@ function parseIdParam(value: string): number | null {
     return null;
   }
   return id;
+}
+
+function handleUserError(
+  error: unknown,
+  res: Response,
+  next: NextFunction
+): void {
+  if (error instanceof UserError) {
+    res.status(error.statusCode).json({
+      success: false,
+      message: error.message,
+    });
+    return;
+  }
+  next(error);
 }
 
 export async function getUsersController(
@@ -55,5 +78,108 @@ export async function getUserByIdController(
     });
   } catch (error) {
     next(error);
+  }
+}
+
+export async function createUserController(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const user = await createUser({
+      phone: req.body?.phone,
+      name: req.body?.name,
+      note: req.body?.note,
+    });
+
+    res.status(201).json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    handleUserError(error, res, next);
+  }
+}
+
+export async function updateUserController(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const id = parseIdParam(req.params.id);
+    if (id === null) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid id",
+      });
+      return;
+    }
+
+    const user = await updateUser(id, {
+      phone: req.body?.phone,
+      name: req.body?.name,
+      note: req.body?.note,
+    });
+
+    res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    handleUserError(error, res, next);
+  }
+}
+
+export async function softDeleteUserController(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const id = parseIdParam(req.params.id);
+    if (id === null) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid id",
+      });
+      return;
+    }
+
+    const user = await softDeleteUser(id);
+    res.status(200).json({
+      success: true,
+      message: "User soft deleted",
+      data: user,
+    });
+  } catch (error) {
+    handleUserError(error, res, next);
+  }
+}
+
+export async function hardDeleteUserController(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const id = parseIdParam(req.params.id);
+    if (id === null) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid id",
+      });
+      return;
+    }
+
+    const result = await hardDeleteUser(id);
+    res.status(200).json({
+      success: true,
+      message: "User hard deleted",
+      data: result,
+    });
+  } catch (error) {
+    handleUserError(error, res, next);
   }
 }
