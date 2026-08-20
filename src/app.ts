@@ -2,6 +2,7 @@ import cors from "cors";
 import express from "express";
 import path from "path";
 import dotenv from "dotenv";
+import authRouter from "./routes/auth.route";
 import usersRouter from "./routes/users.route";
 import adminsRouter from "./routes/admins.route";
 import serviceTypeRouter from "./routes/service_type.route";
@@ -38,6 +39,7 @@ app.get(`${API_PREFIX}/health`, (_req, res) => {
   });
 });
 
+app.use(`${API_PREFIX}/auth`, authRouter);
 app.use(`${API_PREFIX}/users`, usersRouter);
 app.use(`${API_PREFIX}/admins`, adminsRouter);
 app.use(`${API_PREFIX}/service-type`, serviceTypeRouter);
