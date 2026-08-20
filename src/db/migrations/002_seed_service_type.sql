@@ -5,8 +5,7 @@ SELECT seed.code, seed.name
 FROM (
   VALUES
     ('wash', 'ซัก'),
-    ('dry', 'อบ'),
-    ('iron', 'รีด')
+    ('wash_iron', 'ซักรีด')
 ) AS seed(code, name)
 WHERE NOT EXISTS (
   SELECT 1
