@@ -297,6 +297,22 @@
       "name": "List Type",
       "item": [
         {
+          "name": "POST Create List Type",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"towel_normal\",\n  \"name\": \"ผ้าเช็ดตัว\",\n  \"size\": \"normal\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/list-type", "host": ["{{base_url}}"], "path": ["list-type"] }
+          },
+          "response": []
+        },
+        {
           "name": "GET All List Type",
           "request": {
             "method": "GET",
@@ -311,6 +327,44 @@
             "method": "GET",
             "header": [],
             "url": { "raw": "{{base_url}}/list-type/{{list_type_id}}", "host": ["{{base_url}}"], "path": ["list-type", "{{list_type_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT Update List Type",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"towel_normal\",\n  \"name\": \"ผ้าเช็ดตัว\",\n  \"size\": \"normal\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/list-type/{{list_type_id}}", "host": ["{{base_url}}"], "path": ["list-type", "{{list_type_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Soft Delete List Type",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/list-type/{{list_type_id}}", "host": ["{{base_url}}"], "path": ["list-type", "{{list_type_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Hard Delete List Type",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/list-type/{{list_type_id}}/hard", "host": ["{{base_url}}"], "path": ["list-type", "{{list_type_id}}", "hard"] }
           },
           "response": []
         }
