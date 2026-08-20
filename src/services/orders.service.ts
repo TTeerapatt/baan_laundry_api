@@ -6,6 +6,7 @@ export interface OrderListItem {
   user_id: number;
   admin_id: number | null;
   status: string;
+  payment_status: string;
   subtotal: string;
   discount: string;
   total: string;
@@ -17,7 +18,7 @@ export interface OrderListItem {
 export async function getActiveOrders(): Promise<OrderListItem[]> {
   const query = `
     SELECT
-      id, ticket_no, user_id, admin_id, status,
+      id, ticket_no, user_id, admin_id, status, payment_status,
       subtotal, discount, total, note, created_at, updated_at
     FROM orders
     WHERE deleted_at IS NULL
@@ -33,7 +34,7 @@ export async function getActiveOrderById(
 ): Promise<OrderListItem | null> {
   const query = `
     SELECT
-      id, ticket_no, user_id, admin_id, status,
+      id, ticket_no, user_id, admin_id, status, payment_status,
       subtotal, discount, total, note, created_at, updated_at
     FROM orders
     WHERE id = $1

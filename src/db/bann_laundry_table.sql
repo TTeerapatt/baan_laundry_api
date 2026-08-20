@@ -293,21 +293,23 @@ CREATE TABLE IF NOT EXISTS orders (
   ticket_no   VARCHAR(64)    NOT NULL,
   user_id     BIGINT         NOT NULL REFERENCES users (id),
   admin_id    BIGINT         REFERENCES admins (id),
-  status      VARCHAR(32)    NOT NULL DEFAULT 'received'
-                CHECK (status IN (
-                  'received',
-                  'processing',
-                  'ready',
-                  'completed',
-                  'cancelled'
-                )),
-  subtotal    NUMERIC(12, 2) NOT NULL DEFAULT 0 CHECK (subtotal >= 0),
-  discount    NUMERIC(12, 2) NOT NULL DEFAULT 0 CHECK (discount >= 0),
-  total       NUMERIC(12, 2) NOT NULL DEFAULT 0 CHECK (total >= 0),
-  note        TEXT,
-  created_at  TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
-  updated_at  TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
-  deleted_at  TIMESTAMPTZ,
+  status          VARCHAR(32)    NOT NULL DEFAULT 'received'
+                    CHECK (status IN (
+                      'received',
+                      'processing',
+                      'ready',
+                      'completed',
+                      'cancelled'
+                    )),
+  payment_status  VARCHAR(32)    NOT NULL DEFAULT 'unpaid'
+                    CHECK (payment_status IN ('unpaid', 'paid')),
+  subtotal        NUMERIC(12, 2) NOT NULL DEFAULT 0 CHECK (subtotal >= 0),
+  discount        NUMERIC(12, 2) NOT NULL DEFAULT 0 CHECK (discount >= 0),
+  total           NUMERIC(12, 2) NOT NULL DEFAULT 0 CHECK (total >= 0),
+  note            TEXT,
+  created_at      TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+  deleted_at      TIMESTAMPTZ,
   CHECK (total = subtotal - discount)
 );
 
@@ -316,7 +318,8 @@ COMMENT ON COLUMN orders.id IS 'PK';
 COMMENT ON COLUMN orders.ticket_no IS 'เลขใบรับผ้า — unique เฉพาะแถวที่ยังไม่ลบ';
 COMMENT ON COLUMN orders.user_id IS 'FK → users.id ลูกค้า';
 COMMENT ON COLUMN orders.admin_id IS 'FK → admins.id พนักงานที่รับออเดอร์';
-COMMENT ON COLUMN orders.status IS 'received | processing | ready | completed | cancelled';
+COMMENT ON COLUMN orders.status IS 'สถานะงาน: received | processing | ready | completed | cancelled';
+COMMENT ON COLUMN orders.payment_status IS 'สถานะชำระเงิน: unpaid = ยังไม่จ่าย, paid = จ่ายแล้ว';
 COMMENT ON COLUMN orders.subtotal IS 'ยอดก่อนส่วนลด';
 COMMENT ON COLUMN orders.discount IS 'ส่วนลด';
 COMMENT ON COLUMN orders.total IS 'ยอดสุทธิ = subtotal - discount';
@@ -339,6 +342,10 @@ CREATE INDEX IF NOT EXISTS orders_admin_id_idx
 
 CREATE INDEX IF NOT EXISTS orders_status_idx
   ON orders (status)
+  WHERE deleted_at IS NULL;
+
+CREATE INDEX IF NOT EXISTS orders_payment_status_idx
+  ON orders (payment_status)
   WHERE deleted_at IS NULL;
 
 DROP TRIGGER IF EXISTS orders_set_updated_at ON orders;
