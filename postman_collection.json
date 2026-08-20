@@ -451,6 +451,22 @@
       "name": "Orders",
       "item": [
         {
+          "name": "POST Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": 1,\n  \"discount\": 0,\n  \"note\": \"รับผ้าวันนี้\",\n  \"items\": [\n    { \"list_price_id\": 1, \"qty\": 3, \"note\": \"เสื้อ\" }\n  ]\n}"
+            },
+            "url": { "raw": "{{base_url}}/orders", "host": ["{{base_url}}"], "path": ["orders"] }
+          },
+          "response": []
+        },
+        {
           "name": "GET All Orders",
           "request": {
             "method": "GET",
@@ -467,12 +483,66 @@
             "url": { "raw": "{{base_url}}/orders/{{order_id}}", "host": ["{{base_url}}"], "path": ["orders", "{{order_id}}"] }
           },
           "response": []
+        },
+        {
+          "name": "PUT Update Order",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"processing\",\n  \"payment_status\": \"unpaid\",\n  \"discount\": 0,\n  \"note\": \"กำลังซัก\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/orders/{{order_id}}", "host": ["{{base_url}}"], "path": ["orders", "{{order_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Soft Delete Order",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/orders/{{order_id}}", "host": ["{{base_url}}"], "path": ["orders", "{{order_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Hard Delete Order",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/orders/{{order_id}}/hard", "host": ["{{base_url}}"], "path": ["orders", "{{order_id}}", "hard"] }
+          },
+          "response": []
         }
       ]
     },
     {
       "name": "Order Items",
       "item": [
+        {
+          "name": "POST Create Order Item",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"order_id\": 1,\n  \"list_price_id\": 1,\n  \"qty\": 2,\n  \"note\": \"เพิ่มรายการ\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/order-items", "host": ["{{base_url}}"], "path": ["order-items"] }
+          },
+          "response": []
+        },
         {
           "name": "GET All Order Items",
           "request": {
@@ -490,12 +560,66 @@
             "url": { "raw": "{{base_url}}/order-items/{{order_item_id}}", "host": ["{{base_url}}"], "path": ["order-items", "{{order_item_id}}"] }
           },
           "response": []
+        },
+        {
+          "name": "PUT Update Order Item",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"qty\": 4,\n  \"note\": \"ปรับจำนวน\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/order-items/{{order_item_id}}", "host": ["{{base_url}}"], "path": ["order-items", "{{order_item_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Soft Delete Order Item",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/order-items/{{order_item_id}}", "host": ["{{base_url}}"], "path": ["order-items", "{{order_item_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Hard Delete Order Item",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/order-items/{{order_item_id}}/hard", "host": ["{{base_url}}"], "path": ["order-items", "{{order_item_id}}", "hard"] }
+          },
+          "response": []
         }
       ]
     },
     {
       "name": "Order Log",
       "item": [
+        {
+          "name": "POST Create Order Log",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"order_id\": 1,\n  \"action\": \"note\",\n  \"message\": \"ลูกค้าขอรีบ\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/order-log", "host": ["{{base_url}}"], "path": ["order-log"] }
+          },
+          "response": []
+        },
         {
           "name": "GET All Order Log",
           "request": {
@@ -511,6 +635,44 @@
             "method": "GET",
             "header": [],
             "url": { "raw": "{{base_url}}/order-log/{{order_log_id}}", "host": ["{{base_url}}"], "path": ["order-log", "{{order_log_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT Update Order Log",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"note\",\n  \"message\": \"อัปเดตหมายเหตุ\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/order-log/{{order_log_id}}", "host": ["{{base_url}}"], "path": ["order-log", "{{order_log_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Soft Delete Order Log",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/order-log/{{order_log_id}}", "host": ["{{base_url}}"], "path": ["order-log", "{{order_log_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Hard Delete Order Log",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/order-log/{{order_log_id}}/hard", "host": ["{{base_url}}"], "path": ["order-log", "{{order_log_id}}", "hard"] }
           },
           "response": []
         }
