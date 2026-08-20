@@ -1,12 +1,12 @@
 {
-  "name": "0923_eef_webgame_api",
+  "name": "laundry_api",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "build": "tsc",
-    "dev": "nodemon app.ts",
-    "watch": "nodemon --watch ./ --ext ts,js,json --exec \"ts-node ./app.ts\"",
-    "start": "ts-node ./app.ts"
+    "dev": "nodemon --watch src --ext ts,js,json --exec \"ts-node src/app.ts\"",
+    "watch": "nodemon --watch src --ext ts,js,json --exec \"ts-node src/app.ts\"",
+    "start": "node dist/app.js"
   },
   "dependencies": {
     "@next/env": "^15.3.4",
