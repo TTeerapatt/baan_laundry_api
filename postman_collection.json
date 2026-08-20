@@ -374,6 +374,22 @@
       "name": "List Price",
       "item": [
         {
+          "name": "POST Create List Price",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"service_type_id\": 1,\n  \"list_type_id\": 1,\n  \"unit_price\": 15\n}"
+            },
+            "url": { "raw": "{{base_url}}/list-price", "host": ["{{base_url}}"], "path": ["list-price"] }
+          },
+          "response": []
+        },
+        {
           "name": "GET All List Price",
           "request": {
             "method": "GET",
@@ -388,6 +404,44 @@
             "method": "GET",
             "header": [],
             "url": { "raw": "{{base_url}}/list-price/{{list_price_id}}", "host": ["{{base_url}}"], "path": ["list-price", "{{list_price_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT Update List Price",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"service_type_id\": 1,\n  \"list_type_id\": 1,\n  \"unit_price\": 20\n}"
+            },
+            "url": { "raw": "{{base_url}}/list-price/{{list_price_id}}", "host": ["{{base_url}}"], "path": ["list-price", "{{list_price_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Soft Delete List Price",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/list-price/{{list_price_id}}", "host": ["{{base_url}}"], "path": ["list-price", "{{list_price_id}}"] }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE Hard Delete List Price",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/list-price/{{list_price_id}}/hard", "host": ["{{base_url}}"], "path": ["list-price", "{{list_price_id}}", "hard"] }
           },
           "response": []
         }

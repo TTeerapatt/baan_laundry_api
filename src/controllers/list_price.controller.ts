@@ -1,7 +1,12 @@
 import type { Request, Response, NextFunction } from "express";
 import {
+  ListPriceError,
+  createListPrice,
   getActiveListPriceById,
   getActiveListPrices,
+  hardDeleteListPrice,
+  softDeleteListPrice,
+  updateListPrice,
 } from "../services/list_price.service";
 
 function parseIdParam(value: string): number | null {
@@ -10,6 +15,21 @@ function parseIdParam(value: string): number | null {
     return null;
   }
   return id;
+}
+
+function handleListPriceError(
+  error: unknown,
+  res: Response,
+  next: NextFunction
+): void {
+  if (error instanceof ListPriceError) {
+    res.status(error.statusCode).json({
+      success: false,
+      message: error.message,
+    });
+    return;
+  }
+  next(error);
 }
 
 export async function getListPricesController(
@@ -58,5 +78,108 @@ export async function getListPriceByIdController(
     });
   } catch (error) {
     next(error);
+  }
+}
+
+export async function createListPriceController(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const listPrice = await createListPrice({
+      service_type_id: req.body?.service_type_id,
+      list_type_id: req.body?.list_type_id,
+      unit_price: req.body?.unit_price,
+    });
+
+    res.status(201).json({
+      success: true,
+      data: listPrice,
+    });
+  } catch (error) {
+    handleListPriceError(error, res, next);
+  }
+}
+
+export async function updateListPriceController(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const id = parseIdParam(req.params.id);
+    if (id === null) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid id",
+      });
+      return;
+    }
+
+    const listPrice = await updateListPrice(id, {
+      service_type_id: req.body?.service_type_id,
+      list_type_id: req.body?.list_type_id,
+      unit_price: req.body?.unit_price,
+    });
+
+    res.status(200).json({
+      success: true,
+      data: listPrice,
+    });
+  } catch (error) {
+    handleListPriceError(error, res, next);
+  }
+}
+
+export async function softDeleteListPriceController(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const id = parseIdParam(req.params.id);
+    if (id === null) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid id",
+      });
+      return;
+    }
+
+    const listPrice = await softDeleteListPrice(id);
+    res.status(200).json({
+      success: true,
+      message: "List price soft deleted",
+      data: listPrice,
+    });
+  } catch (error) {
+    handleListPriceError(error, res, next);
+  }
+}
+
+export async function hardDeleteListPriceController(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const id = parseIdParam(req.params.id);
+    if (id === null) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid id",
+      });
+      return;
+    }
+
+    const result = await hardDeleteListPrice(id);
+    res.status(200).json({
+      success: true,
+      message: "List price hard deleted",
+      data: result,
+    });
+  } catch (error) {
+    handleListPriceError(error, res, next);
   }
 }
