@@ -594,6 +594,7 @@ FROM (
   VALUES
     ('dashboard', 'overview', 'ภาพรวม', 1),
     ('dashboard', 'bi', 'วิเคราะห์ BI', 2),
+    ('management', 'orders', 'ออเดอร์', 0),
     ('management', 'customers', 'ลูกค้า', 1),
     ('management', 'service-types', 'ประเภทบริการ', 2),
     ('management', 'list-prices', 'ราคาบริการ', 3),
@@ -701,6 +702,55 @@ CREATE TRIGGER admin_menu_tab_action_set_updated_at
   BEFORE UPDATE ON admin_menu_tab_action
   FOR EACH ROW
   EXECUTE FUNCTION set_updated_at();
+
+INSERT INTO admin_menu_tab_action (menu_tab_id, permission_action_id)
+SELECT mt.id, pa.id
+FROM (
+  VALUES
+    ('overview', 'view'),
+    ('bi', 'view'),
+    ('orders', 'view'),
+    ('orders', 'add'),
+    ('orders', 'edit'),
+    ('orders', 'delete'),
+    ('orders', 'export'),
+    ('customers', 'view'),
+    ('customers', 'add'),
+    ('customers', 'edit'),
+    ('customers', 'delete'),
+    ('customers', 'export'),
+    ('service-types', 'view'),
+    ('service-types', 'add'),
+    ('service-types', 'edit'),
+    ('service-types', 'delete'),
+    ('service-types', 'export'),
+    ('list-prices', 'view'),
+    ('list-prices', 'add'),
+    ('list-prices', 'edit'),
+    ('list-prices', 'delete'),
+    ('list-prices', 'export'),
+    ('admins', 'view'),
+    ('admins', 'add'),
+    ('admins', 'edit'),
+    ('admins', 'delete'),
+    ('admins', 'export'),
+    ('order_log', 'view'),
+    ('order_log', 'add'),
+    ('admin_log', 'view')
+) AS seed(tab_code, action_code)
+INNER JOIN admin_menu_tab mt
+  ON mt.code = seed.tab_code
+ AND mt.deleted_at IS NULL
+INNER JOIN admin_permission_action pa
+  ON pa.code = seed.action_code
+ AND pa.deleted_at IS NULL
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM admin_menu_tab_action mta
+  WHERE mta.menu_tab_id = mt.id
+    AND mta.permission_action_id = pa.id
+    AND mta.deleted_at IS NULL
+);
 
 -- ---------------------------------------------------------------------------
 -- admin_permissions

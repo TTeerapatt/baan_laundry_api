@@ -21,6 +21,7 @@ FROM (
   VALUES
     ('dashboard', 'overview', 'ภาพรวม', 1),
     ('dashboard', 'bi', 'วิเคราะห์ BI', 2),
+    ('management', 'orders', 'ออเดอร์', 0),
     ('management', 'customers', 'ลูกค้า', 1),
     ('management', 'service-types', 'ประเภทบริการ', 2),
     ('management', 'list-prices', 'ราคาบริการ', 3),

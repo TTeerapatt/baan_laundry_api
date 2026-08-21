@@ -359,19 +359,19 @@ export async function getAdminPermissionsById(
         ON mt.menu_label_id = ml.id
        AND mt.deleted_at IS NULL
        AND mt.is_active = TRUE
-      CROSS JOIN admin_permission_action pa
-      LEFT JOIN admin_menu_tab_action mta
+      INNER JOIN admin_menu_tab_action mta
         ON mta.menu_tab_id = mt.id
-       AND mta.permission_action_id = pa.id
        AND mta.deleted_at IS NULL
+      INNER JOIN admin_permission_action pa
+        ON pa.id = mta.permission_action_id
+       AND pa.deleted_at IS NULL
+       AND pa.is_active = TRUE
       LEFT JOIN admin_permissions ap
         ON ap.menu_tab_action_id = mta.id
        AND ap.admin_id = $1
        AND ap.deleted_at IS NULL
       WHERE ml.deleted_at IS NULL
         AND ml.is_active = TRUE
-        AND pa.deleted_at IS NULL
-        AND pa.is_active = TRUE
       ORDER BY ml.sort_order ASC, mt.sort_order ASC, pa.sort_order ASC
     `,
     [id]

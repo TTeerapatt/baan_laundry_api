@@ -8,14 +8,45 @@ import {
   updateOrderItemController,
 } from "../controllers/order_items.controller";
 import { authMiddleware } from "../middleware/auth.middleware";
+import { requirePermission } from "../middleware/permission.middleware";
 
 const orderItemsRouter = Router();
 
-orderItemsRouter.post("/", authMiddleware, createOrderItemController);
-orderItemsRouter.get("/", authMiddleware, getOrderItemsController);
-orderItemsRouter.get("/:id", authMiddleware, getOrderItemByIdController);
-orderItemsRouter.put("/:id", authMiddleware, updateOrderItemController);
-orderItemsRouter.delete("/:id/hard", authMiddleware, hardDeleteOrderItemController);
-orderItemsRouter.delete("/:id", authMiddleware, softDeleteOrderItemController);
+orderItemsRouter.post(
+  "/",
+  authMiddleware,
+  requirePermission("orders", "add"),
+  createOrderItemController
+);
+orderItemsRouter.get(
+  "/",
+  authMiddleware,
+  requirePermission("orders", "view"),
+  getOrderItemsController
+);
+orderItemsRouter.get(
+  "/:id",
+  authMiddleware,
+  requirePermission("orders", "view"),
+  getOrderItemByIdController
+);
+orderItemsRouter.put(
+  "/:id",
+  authMiddleware,
+  requirePermission("orders", "edit"),
+  updateOrderItemController
+);
+orderItemsRouter.delete(
+  "/:id/hard",
+  authMiddleware,
+  requirePermission("orders", "delete"),
+  hardDeleteOrderItemController
+);
+orderItemsRouter.delete(
+  "/:id",
+  authMiddleware,
+  requirePermission("orders", "delete"),
+  softDeleteOrderItemController
+);
 
 export default orderItemsRouter;
