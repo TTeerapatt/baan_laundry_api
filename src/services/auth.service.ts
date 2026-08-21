@@ -12,6 +12,7 @@ export interface AdminProfile {
   email: string;
   display_name: string;
   role: string;
+  last_login_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -144,7 +145,9 @@ export async function createAdmin(
       `
         INSERT INTO admins (email, display_name, role)
         VALUES ($1, $2, $3)
-        RETURNING id, email, display_name, role, created_at, updated_at
+        RETURNING
+          id, email, display_name, role, last_login_at,
+          created_at, updated_at
       `,
       [data.email, data.display_name, data.role]
     );
@@ -157,6 +160,16 @@ export async function createAdmin(
         VALUES ($1, $2)
       `,
       [admin.id, passwordHash]
+    );
+
+    await client.query(
+      `
+        INSERT INTO admin_log (
+          admin_id, action, entity_type, entity_id, message
+        )
+        VALUES ($1, 'create', 'admin', $1, 'Admin registered')
+      `,
+      [admin.id]
     );
 
     await client.query("COMMIT");
@@ -177,57 +190,86 @@ export async function loginAdmin(
   input: LoginAdminInput
 ): Promise<AuthTokenResult> {
   const data = assertLoginInput(input);
+  const client = await pool.connect();
 
-  const result = await pool.query<{
-    id: number;
-    email: string;
-    display_name: string;
-    role: string;
-    created_at: string;
-    updated_at: string;
-    password_hash: string;
-  }>(
-    `
-      SELECT
-        a.id,
-        a.email,
-        a.display_name,
-        a.role,
-        a.created_at,
-        a.updated_at,
-        aa.password_hash
-      FROM admins a
-      INNER JOIN admin_auth aa
-        ON aa.admin_id = a.id
-       AND aa.deleted_at IS NULL
-      WHERE a.email = $1
-        AND a.deleted_at IS NULL
-      LIMIT 1
-    `,
-    [data.email]
-  );
+  try {
+    await client.query("BEGIN");
 
-  const row = result.rows[0];
-  if (!row) {
-    throw new AuthError(401, "Invalid email or password");
+    const result = await client.query<{
+      id: number;
+      email: string;
+      display_name: string;
+      role: string;
+      last_login_at: string | null;
+      created_at: string;
+      updated_at: string;
+      password_hash: string;
+    }>(
+      `
+        SELECT
+          a.id,
+          a.email,
+          a.display_name,
+          a.role,
+          a.last_login_at,
+          a.created_at,
+          a.updated_at,
+          aa.password_hash
+        FROM admins a
+        INNER JOIN admin_auth aa
+          ON aa.admin_id = a.id
+         AND aa.deleted_at IS NULL
+        WHERE a.email = $1
+          AND a.deleted_at IS NULL
+        LIMIT 1
+      `,
+      [data.email]
+    );
+
+    const row = result.rows[0];
+    if (!row) {
+      throw new AuthError(401, "Invalid email or password");
+    }
+
+    const matched = await bcrypt.compare(data.password, row.password_hash);
+    if (!matched) {
+      throw new AuthError(401, "Invalid email or password");
+    }
+
+    const updated = await client.query<AdminProfile>(
+      `
+        UPDATE admins
+        SET last_login_at = NOW()
+        WHERE id = $1
+          AND deleted_at IS NULL
+        RETURNING
+          id, email, display_name, role, last_login_at,
+          created_at, updated_at
+      `,
+      [row.id]
+    );
+
+    await client.query(
+      `
+        INSERT INTO admin_log (
+          admin_id, action, entity_type, entity_id, message
+        )
+        VALUES ($1, 'login', 'admin', $1, 'Admin logged in')
+      `,
+      [row.id]
+    );
+
+    await client.query("COMMIT");
+
+    const admin = updated.rows[0];
+    return {
+      token: signToken(admin),
+      admin,
+    };
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
   }
-
-  const matched = await bcrypt.compare(data.password, row.password_hash);
-  if (!matched) {
-    throw new AuthError(401, "Invalid email or password");
-  }
-
-  const admin: AdminProfile = {
-    id: row.id,
-    email: row.email,
-    display_name: row.display_name,
-    role: row.role,
-    created_at: row.created_at,
-    updated_at: row.updated_at,
-  };
-
-  return {
-    token: signToken(admin),
-    admin,
-  };
 }

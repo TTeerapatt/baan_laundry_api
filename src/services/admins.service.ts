@@ -9,6 +9,7 @@ export interface AdminListItem {
   email: string;
   display_name: string;
   role: string;
+  last_login_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -40,7 +41,7 @@ function isValidEmail(email: string): boolean {
 
 export async function getActiveAdmins(): Promise<AdminListItem[]> {
   const query = `
-    SELECT id, email, display_name, role, created_at, updated_at
+    SELECT id, email, display_name, role, last_login_at, created_at, updated_at
     FROM admins
     WHERE deleted_at IS NULL
     ORDER BY id DESC
@@ -54,7 +55,7 @@ export async function getActiveAdminById(
   id: number
 ): Promise<AdminListItem | null> {
   const query = `
-    SELECT id, email, display_name, role, created_at, updated_at
+    SELECT id, email, display_name, role, last_login_at, created_at, updated_at
     FROM admins
     WHERE id = $1
       AND deleted_at IS NULL
@@ -130,7 +131,7 @@ export async function updateAdmin(
             role = $3
         WHERE id = $4
           AND deleted_at IS NULL
-        RETURNING id, email, display_name, role, created_at, updated_at
+        RETURNING id, email, display_name, role, last_login_at, created_at, updated_at
       `,
       [nextEmail, nextDisplayName, nextRole, id]
     );
@@ -170,7 +171,7 @@ export async function softDeleteAdmin(id: number): Promise<AdminListItem> {
         SET deleted_at = NOW()
         WHERE id = $1
           AND deleted_at IS NULL
-        RETURNING id, email, display_name, role, created_at, updated_at
+        RETURNING id, email, display_name, role, last_login_at, created_at, updated_at
       `,
       [id]
     );
