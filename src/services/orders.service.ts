@@ -10,10 +10,49 @@ export const ORDER_STATUSES = [
   "cancelled",
 ] as const;
 
+export type OrderStatus = (typeof ORDER_STATUSES)[number];
+
+/** กฎเปลี่ยนสถานะ: จากสถานะปัจจุบัน ไปได้เฉพาะในรายการ */
+export const ORDER_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
+  received: ["processing", "cancelled"],
+  processing: ["ready", "cancelled"],
+  ready: ["completed", "cancelled"],
+  completed: [],
+  cancelled: [],
+};
+
 export const PAYMENT_STATUSES = ["unpaid", "paid"] as const;
 
-export type OrderStatus = (typeof ORDER_STATUSES)[number];
 export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
+
+function assertAllowedStatusTransition(
+  fromStatus: string,
+  toStatus: string
+): void {
+  if (fromStatus === toStatus) {
+    return;
+  }
+
+  if (!ORDER_STATUSES.includes(fromStatus as OrderStatus)) {
+    throw new OrderError(400, `Invalid current status: ${fromStatus}`);
+  }
+  if (!ORDER_STATUSES.includes(toStatus as OrderStatus)) {
+    throw new OrderError(
+      400,
+      "status must be one of: received, processing, ready, completed, cancelled"
+    );
+  }
+
+  const allowed = ORDER_STATUS_TRANSITIONS[fromStatus as OrderStatus];
+  if (!allowed.includes(toStatus as OrderStatus)) {
+    const allowedText =
+      allowed.length > 0 ? allowed.join(", ") : "(terminal — no further changes)";
+    throw new OrderError(
+      400,
+      `Cannot change status from ${fromStatus} to ${toStatus}. Allowed: ${allowedText}`
+    );
+  }
+}
 
 export interface OrderListItem {
   id: number;
@@ -582,6 +621,10 @@ export async function updateOrder(
       throw new OrderError(400, "payment_status must be one of: unpaid, paid");
     }
 
+    if (nextStatus !== existing.status) {
+      assertAllowedStatusTransition(existing.status, nextStatus);
+    }
+
     await assertActiveUser(client, nextUserId);
 
     await client.query(
@@ -751,6 +794,8 @@ export async function updateOrderStatus(
       await client.query("COMMIT");
       return { ...existing, items };
     }
+
+    assertAllowedStatusTransition(existing.status, nextStatus);
 
     await client.query(
       `
