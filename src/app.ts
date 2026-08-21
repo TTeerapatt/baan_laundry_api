@@ -12,6 +12,7 @@ import ordersRouter from "./routes/orders.route";
 import orderItemsRouter from "./routes/order_items.route";
 import orderLogRouter from "./routes/order_log.route";
 import adminLogRouter from "./routes/admin_log.route";
+import adminMenuRouter from "./routes/admin_menu.route";
 
 dotenv.config();
 
@@ -50,6 +51,7 @@ app.use(`${API_PREFIX}/orders`, ordersRouter);
 app.use(`${API_PREFIX}/order-items`, orderItemsRouter);
 app.use(`${API_PREFIX}/order-log`, orderLogRouter);
 app.use(`${API_PREFIX}/admin-log`, adminLogRouter);
+app.use(`${API_PREFIX}/admin-menu`, adminMenuRouter);
 
 const PORT = Number(process.env.PORT) || 3001;
 
