@@ -100,6 +100,7 @@ export async function updateAdminController(
       display_name: req.body?.display_name,
       role: req.body?.role,
       password: req.body?.password,
+      adminId: req.admin?.adminId ?? null,
     });
 
     res.status(200).json({
@@ -126,7 +127,7 @@ export async function softDeleteAdminController(
       return;
     }
 
-    const admin = await softDeleteAdmin(id);
+    const admin = await softDeleteAdmin(id, req.admin?.adminId ?? null);
     res.status(200).json({
       success: true,
       message: "Admin soft deleted",
@@ -152,7 +153,7 @@ export async function hardDeleteAdminController(
       return;
     }
 
-    const result = await hardDeleteAdmin(id);
+    const result = await hardDeleteAdmin(id, req.admin?.adminId ?? null);
     res.status(200).json({
       success: true,
       message: "Admin hard deleted",

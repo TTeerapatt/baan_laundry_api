@@ -91,6 +91,7 @@ export async function createListPriceController(
       service_type_id: req.body?.service_type_id,
       list_type_id: req.body?.list_type_id,
       unit_price: req.body?.unit_price,
+      adminId: req.admin?.adminId ?? null,
     });
 
     res.status(201).json({
@@ -121,6 +122,7 @@ export async function updateListPriceController(
       service_type_id: req.body?.service_type_id,
       list_type_id: req.body?.list_type_id,
       unit_price: req.body?.unit_price,
+      adminId: req.admin?.adminId ?? null,
     });
 
     res.status(200).json({
@@ -147,7 +149,10 @@ export async function softDeleteListPriceController(
       return;
     }
 
-    const listPrice = await softDeleteListPrice(id);
+    const listPrice = await softDeleteListPrice(
+      id,
+      req.admin?.adminId ?? null
+    );
     res.status(200).json({
       success: true,
       message: "List price soft deleted",
@@ -173,7 +178,7 @@ export async function hardDeleteListPriceController(
       return;
     }
 
-    const result = await hardDeleteListPrice(id);
+    const result = await hardDeleteListPrice(id, req.admin?.adminId ?? null);
     res.status(200).json({
       success: true,
       message: "List price hard deleted",

@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import pool from "../config/database.config";
+import { insertAdminLog } from "./admin_log.service";
 
 const BCRYPT_ROUNDS = 10;
 const ALLOWED_ROLES = ["owner", "admin", "staff"] as const;
@@ -19,6 +20,7 @@ export interface UpdateAdminInput {
   display_name?: string;
   role?: string;
   password?: string;
+  adminId?: number | null;
 }
 
 export class AdminError extends Error {
@@ -149,6 +151,17 @@ export async function updateAdmin(
       );
     }
 
+    await insertAdminLog(
+      {
+        adminId: input.adminId,
+        action: "update",
+        entityType: "admin",
+        entityId: id,
+        message: `Updated admin ${id}`,
+      },
+      client
+    );
+
     await client.query("COMMIT");
     return updated.rows[0];
   } catch (error) {
@@ -159,7 +172,10 @@ export async function updateAdmin(
   }
 }
 
-export async function softDeleteAdmin(id: number): Promise<AdminListItem> {
+export async function softDeleteAdmin(
+  id: number,
+  adminId?: number | null
+): Promise<AdminListItem> {
   const client = await pool.connect();
 
   try {
@@ -190,6 +206,17 @@ export async function softDeleteAdmin(id: number): Promise<AdminListItem> {
       [id]
     );
 
+    await insertAdminLog(
+      {
+        adminId,
+        action: "soft_delete",
+        entityType: "admin",
+        entityId: id,
+        message: `Soft deleted admin ${id}`,
+      },
+      client
+    );
+
     await client.query("COMMIT");
     return updated.rows[0];
   } catch (error) {
@@ -200,7 +227,10 @@ export async function softDeleteAdmin(id: number): Promise<AdminListItem> {
   }
 }
 
-export async function hardDeleteAdmin(id: number): Promise<{ id: number }> {
+export async function hardDeleteAdmin(
+  id: number,
+  adminId?: number | null
+): Promise<{ id: number }> {
   const client = await pool.connect();
 
   try {
@@ -224,6 +254,22 @@ export async function hardDeleteAdmin(id: number): Promise<{ id: number }> {
       `UPDATE order_log SET admin_id = NULL WHERE admin_id = $1`,
       [id]
     );
+    await client.query(`DELETE FROM admin_log WHERE admin_id = $1`, [id]);
+
+    // Skip self hard-delete log — admin_log.admin_id FK would block DELETE admins
+    if (adminId == null || Number(adminId) !== Number(id)) {
+      await insertAdminLog(
+        {
+          adminId,
+          action: "hard_delete",
+          entityType: "admin",
+          entityId: id,
+          message: `Hard deleted admin ${id}`,
+        },
+        client
+      );
+    }
+
     await client.query(`DELETE FROM admins WHERE id = $1`, [id]);
 
     await client.query("COMMIT");

@@ -91,6 +91,7 @@ export async function createListTypeController(
       code: req.body?.code,
       name: req.body?.name,
       size: req.body?.size,
+      adminId: req.admin?.adminId ?? null,
     });
 
     res.status(201).json({
@@ -121,6 +122,7 @@ export async function updateListTypeController(
       code: req.body?.code,
       name: req.body?.name,
       size: req.body?.size,
+      adminId: req.admin?.adminId ?? null,
     });
 
     res.status(200).json({
@@ -147,7 +149,7 @@ export async function softDeleteListTypeController(
       return;
     }
 
-    const listType = await softDeleteListType(id);
+    const listType = await softDeleteListType(id, req.admin?.adminId ?? null);
     res.status(200).json({
       success: true,
       message: "List type soft deleted",
@@ -173,7 +175,7 @@ export async function hardDeleteListTypeController(
       return;
     }
 
-    const result = await hardDeleteListType(id);
+    const result = await hardDeleteListType(id, req.admin?.adminId ?? null);
     res.status(200).json({
       success: true,
       message: "List type hard deleted",

@@ -15,7 +15,8 @@
     { "key": "list_price_id", "value": "1" },
     { "key": "order_id", "value": "1" },
     { "key": "order_item_id", "value": "1" },
-    { "key": "order_log_id", "value": "1" }
+    { "key": "order_log_id", "value": "1" },
+    { "key": "admin_log_id", "value": "1" }
   ],
   "item": [
     {
@@ -763,6 +764,64 @@
               { "key": "Authorization", "value": "Bearer {{token}}" }
             ],
             "url": { "raw": "{{base_url}}/order-log/{{order_log_id}}", "host": ["{{base_url}}"], "path": ["order-log", "{{order_log_id}}"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin Log",
+      "item": [
+        {
+          "name": "GET All Admin Log",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin-log",
+              "host": ["{{base_url}}"],
+              "path": ["admin-log"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Search Admin Log",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin-log?admin_id=1&action=login&entity_type=admin&date_from=2026-08-01&date_to=2026-08-31",
+              "host": ["{{base_url}}"],
+              "path": ["admin-log"],
+              "query": [
+                { "key": "admin_id", "value": "1" },
+                { "key": "action", "value": "login" },
+                { "key": "entity_type", "value": "admin" },
+                { "key": "entity_id", "value": "1", "disabled": true },
+                { "key": "date_from", "value": "2026-08-01" },
+                { "key": "date_to", "value": "2026-08-31" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET Admin Log By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin-log/{{admin_log_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["admin-log", "{{admin_log_id}}"]
+            }
           },
           "response": []
         }

@@ -1,4 +1,5 @@
 import pool from "../config/database.config";
+import { insertAdminLog } from "./admin_log.service";
 
 export interface ServiceTypeListItem {
   id: number;
@@ -11,11 +12,13 @@ export interface ServiceTypeListItem {
 export interface CreateServiceTypeInput {
   code: string;
   name: string;
+  adminId?: number | null;
 }
 
 export interface UpdateServiceTypeInput {
   code?: string;
   name?: string;
+  adminId?: number | null;
 }
 
 export class ServiceTypeError extends Error {
@@ -95,7 +98,16 @@ export async function createServiceType(
     [code, name]
   );
 
-  return result.rows[0];
+  const serviceType = result.rows[0];
+  await insertAdminLog({
+    adminId: input.adminId,
+    action: "create",
+    entityType: "service_type",
+    entityId: Number(serviceType.id),
+    message: `Created service type ${serviceType.id}`,
+  });
+
+  return serviceType;
 }
 
 export async function updateServiceType(
@@ -148,11 +160,20 @@ export async function updateServiceType(
     [nextCode, nextName, id]
   );
 
+  await insertAdminLog({
+    adminId: input.adminId,
+    action: "update",
+    entityType: "service_type",
+    entityId: id,
+    message: `Updated service type ${id}`,
+  });
+
   return result.rows[0];
 }
 
 export async function softDeleteServiceType(
-  id: number
+  id: number,
+  adminId?: number | null
 ): Promise<ServiceTypeListItem> {
   const result = await pool.query<ServiceTypeListItem>(
     `
@@ -169,11 +190,20 @@ export async function softDeleteServiceType(
     throw new ServiceTypeError(404, "Service type not found");
   }
 
+  await insertAdminLog({
+    adminId,
+    action: "soft_delete",
+    entityType: "service_type",
+    entityId: id,
+    message: `Soft deleted service type ${id}`,
+  });
+
   return result.rows[0];
 }
 
 export async function hardDeleteServiceType(
-  id: number
+  id: number,
+  adminId?: number | null
 ): Promise<{ id: number }> {
   const found = await pool.query<{ id: number }>(
     `SELECT id FROM service_type WHERE id = $1 LIMIT 1`,
@@ -207,5 +237,14 @@ export async function hardDeleteServiceType(
   }
 
   await pool.query(`DELETE FROM service_type WHERE id = $1`, [id]);
+
+  await insertAdminLog({
+    adminId,
+    action: "hard_delete",
+    entityType: "service_type",
+    entityId: id,
+    message: `Hard deleted service type ${id}`,
+  });
+
   return { id };
 }

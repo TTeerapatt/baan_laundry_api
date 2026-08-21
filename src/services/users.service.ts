@@ -1,4 +1,5 @@
 import pool from "../config/database.config";
+import { insertAdminLog } from "./admin_log.service";
 
 export interface UserListItem {
   id: number;
@@ -13,6 +14,7 @@ export interface CreateUserInput {
   phone: string;
   name: string;
   note?: string;
+  adminId?: number | null;
 }
 
 export class UserError extends Error {
@@ -124,13 +126,23 @@ export async function createUser(input: CreateUserInput): Promise<UserListItem> 
     [phone, name, note]
   );
 
-  return result.rows[0];
+  const user = result.rows[0];
+  await insertAdminLog({
+    adminId: input.adminId,
+    action: "create",
+    entityType: "user",
+    entityId: Number(user.id),
+    message: `Created user ${user.id}`,
+  });
+
+  return user;
 }
 
 export interface UpdateUserInput {
   phone?: string;
   name?: string;
   note?: string | null;
+  adminId?: number | null;
 }
 
 export async function updateUser(
@@ -190,10 +202,21 @@ export async function updateUser(
     [nextPhone, nextName, nextNote, id]
   );
 
+  await insertAdminLog({
+    adminId: input.adminId,
+    action: "update",
+    entityType: "user",
+    entityId: id,
+    message: `Updated user ${id}`,
+  });
+
   return result.rows[0];
 }
 
-export async function softDeleteUser(id: number): Promise<UserListItem> {
+export async function softDeleteUser(
+  id: number,
+  adminId?: number | null
+): Promise<UserListItem> {
   const result = await pool.query<UserListItem>(
     `
       UPDATE users
@@ -209,10 +232,21 @@ export async function softDeleteUser(id: number): Promise<UserListItem> {
     throw new UserError(404, "User not found");
   }
 
+  await insertAdminLog({
+    adminId,
+    action: "soft_delete",
+    entityType: "user",
+    entityId: id,
+    message: `Soft deleted user ${id}`,
+  });
+
   return result.rows[0];
 }
 
-export async function hardDeleteUser(id: number): Promise<{ id: number }> {
+export async function hardDeleteUser(
+  id: number,
+  adminId?: number | null
+): Promise<{ id: number }> {
   const found = await pool.query<{ id: number }>(
     `SELECT id FROM users WHERE id = $1 LIMIT 1`,
     [id]
@@ -235,5 +269,14 @@ export async function hardDeleteUser(id: number): Promise<{ id: number }> {
   }
 
   await pool.query(`DELETE FROM users WHERE id = $1`, [id]);
+
+  await insertAdminLog({
+    adminId,
+    action: "hard_delete",
+    entityType: "user",
+    entityId: id,
+    message: `Hard deleted user ${id}`,
+  });
+
   return { id };
 }

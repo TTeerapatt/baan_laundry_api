@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import pool from "../config/database.config";
+import { insertAdminLog } from "./admin_log.service";
 
 const BCRYPT_ROUNDS = 10;
 const ALLOWED_ROLES = ["owner", "admin", "staff"] as const;
@@ -162,14 +163,15 @@ export async function createAdmin(
       [admin.id, passwordHash]
     );
 
-    await client.query(
-      `
-        INSERT INTO admin_log (
-          admin_id, action, entity_type, entity_id, message
-        )
-        VALUES ($1, 'create', 'admin', $1, 'Admin registered')
-      `,
-      [admin.id]
+    await insertAdminLog(
+      {
+        adminId: Number(admin.id),
+        action: "create",
+        entityType: "admin",
+        entityId: Number(admin.id),
+        message: "Admin registered",
+      },
+      client
     );
 
     await client.query("COMMIT");
@@ -249,14 +251,15 @@ export async function loginAdmin(
       [row.id]
     );
 
-    await client.query(
-      `
-        INSERT INTO admin_log (
-          admin_id, action, entity_type, entity_id, message
-        )
-        VALUES ($1, 'login', 'admin', $1, 'Admin logged in')
-      `,
-      [row.id]
+    await insertAdminLog(
+      {
+        adminId: Number(row.id),
+        action: "login",
+        entityType: "admin",
+        entityId: Number(row.id),
+        message: "Admin logged in",
+      },
+      client
     );
 
     await client.query("COMMIT");

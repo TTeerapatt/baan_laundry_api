@@ -1,5 +1,6 @@
 import type { PoolClient } from "pg";
 import pool from "../config/database.config";
+import { insertAdminLog } from "./admin_log.service";
 
 export const ORDER_STATUSES = [
   "received",
@@ -513,6 +514,17 @@ export async function createOrder(
       message: "Order created",
     });
 
+    await insertAdminLog(
+      {
+        adminId: input.adminId,
+        action: "create",
+        entityType: "order",
+        entityId: Number(order.id),
+        message: `Created order ${order.id}`,
+      },
+      client
+    );
+
     const saved = await getOrderRow(Number(order.id), client);
     const savedItems = await getOrderItemsByOrderId(Number(order.id), client);
     await client.query("COMMIT");
@@ -622,6 +634,17 @@ export async function updateOrder(
       });
     }
 
+    await insertAdminLog(
+      {
+        adminId: input.adminId,
+        action: "update",
+        entityType: "order",
+        entityId: id,
+        message: `Updated order ${id}`,
+      },
+      client
+    );
+
     const saved = await getOrderRow(id, client);
     const savedItems = await getOrderItemsByOrderId(id, client);
     await client.query("COMMIT");
@@ -677,6 +700,17 @@ export async function updateOrderPaymentStatus(
       action: "payment_change",
       message: `Payment changed from ${existing.payment_status} to ${nextPaymentStatus}`,
     });
+
+    await insertAdminLog(
+      {
+        adminId: input.adminId,
+        action: "payment_change",
+        entityType: "order",
+        entityId: id,
+        message: `Payment changed for order ${id}`,
+      },
+      client
+    );
 
     const saved = await getOrderRow(id, client);
     const savedItems = await getOrderItemsByOrderId(id, client);
@@ -737,6 +771,17 @@ export async function updateOrderStatus(
       message: `Status changed from ${existing.status} to ${nextStatus}`,
     });
 
+    await insertAdminLog(
+      {
+        adminId: input.adminId,
+        action: "status_change",
+        entityType: "order",
+        entityId: id,
+        message: `Status changed for order ${id}`,
+      },
+      client
+    );
+
     const saved = await getOrderRow(id, client);
     const savedItems = await getOrderItemsByOrderId(id, client);
     await client.query("COMMIT");
@@ -749,7 +794,10 @@ export async function updateOrderStatus(
   }
 }
 
-export async function softDeleteOrder(id: number): Promise<OrderListItem> {
+export async function softDeleteOrder(
+  id: number,
+  adminId?: number | null
+): Promise<OrderListItem> {
   const client = await pool.connect();
 
   try {
@@ -790,6 +838,17 @@ export async function softDeleteOrder(id: number): Promise<OrderListItem> {
       [id]
     );
 
+    await insertAdminLog(
+      {
+        adminId,
+        action: "soft_delete",
+        entityType: "order",
+        entityId: id,
+        message: `Soft deleted order ${id}`,
+      },
+      client
+    );
+
     await client.query("COMMIT");
     return updated.rows[0];
   } catch (error) {
@@ -800,7 +859,10 @@ export async function softDeleteOrder(id: number): Promise<OrderListItem> {
   }
 }
 
-export async function hardDeleteOrder(id: number): Promise<{ id: number }> {
+export async function hardDeleteOrder(
+  id: number,
+  adminId?: number | null
+): Promise<{ id: number }> {
   const client = await pool.connect();
 
   try {
@@ -817,6 +879,17 @@ export async function hardDeleteOrder(id: number): Promise<{ id: number }> {
     await client.query(`DELETE FROM order_items WHERE order_id = $1`, [id]);
     await client.query(`DELETE FROM order_log WHERE order_id = $1`, [id]);
     await client.query(`DELETE FROM orders WHERE id = $1`, [id]);
+
+    await insertAdminLog(
+      {
+        adminId,
+        action: "hard_delete",
+        entityType: "order",
+        entityId: id,
+        message: `Hard deleted order ${id}`,
+      },
+      client
+    );
 
     await client.query("COMMIT");
     return { id };

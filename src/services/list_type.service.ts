@@ -1,4 +1,5 @@
 import pool from "../config/database.config";
+import { insertAdminLog } from "./admin_log.service";
 
 export interface ListTypeListItem {
   id: number;
@@ -13,12 +14,14 @@ export interface CreateListTypeInput {
   code: string;
   name: string;
   size: string;
+  adminId?: number | null;
 }
 
 export interface UpdateListTypeInput {
   code?: string;
   name?: string;
   size?: string;
+  adminId?: number | null;
 }
 
 export class ListTypeError extends Error {
@@ -131,7 +134,16 @@ export async function createListType(
     [code, name, size]
   );
 
-  return result.rows[0];
+  const listType = result.rows[0];
+  await insertAdminLog({
+    adminId: input.adminId,
+    action: "create",
+    entityType: "list_type",
+    entityId: Number(listType.id),
+    message: `Created list type ${listType.id}`,
+  });
+
+  return listType;
 }
 
 export async function updateListType(
@@ -175,11 +187,20 @@ export async function updateListType(
     [nextCode, nextName, nextSize, id]
   );
 
+  await insertAdminLog({
+    adminId: input.adminId,
+    action: "update",
+    entityType: "list_type",
+    entityId: id,
+    message: `Updated list type ${id}`,
+  });
+
   return result.rows[0];
 }
 
 export async function softDeleteListType(
-  id: number
+  id: number,
+  adminId?: number | null
 ): Promise<ListTypeListItem> {
   const result = await pool.query<ListTypeListItem>(
     `
@@ -196,11 +217,20 @@ export async function softDeleteListType(
     throw new ListTypeError(404, "List type not found");
   }
 
+  await insertAdminLog({
+    adminId,
+    action: "soft_delete",
+    entityType: "list_type",
+    entityId: id,
+    message: `Soft deleted list type ${id}`,
+  });
+
   return result.rows[0];
 }
 
 export async function hardDeleteListType(
-  id: number
+  id: number,
+  adminId?: number | null
 ): Promise<{ id: number }> {
   const found = await pool.query<{ id: number }>(
     `SELECT id FROM list_type WHERE id = $1 LIMIT 1`,
@@ -234,5 +264,14 @@ export async function hardDeleteListType(
   }
 
   await pool.query(`DELETE FROM list_type WHERE id = $1`, [id]);
+
+  await insertAdminLog({
+    adminId,
+    action: "hard_delete",
+    entityType: "list_type",
+    entityId: id,
+    message: `Hard deleted list type ${id}`,
+  });
+
   return { id };
 }

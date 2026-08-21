@@ -11,6 +11,7 @@ import listPriceRouter from "./routes/list_price.route";
 import ordersRouter from "./routes/orders.route";
 import orderItemsRouter from "./routes/order_items.route";
 import orderLogRouter from "./routes/order_log.route";
+import adminLogRouter from "./routes/admin_log.route";
 
 dotenv.config();
 
@@ -48,6 +49,7 @@ app.use(`${API_PREFIX}/list-price`, listPriceRouter);
 app.use(`${API_PREFIX}/orders`, ordersRouter);
 app.use(`${API_PREFIX}/order-items`, orderItemsRouter);
 app.use(`${API_PREFIX}/order-log`, orderLogRouter);
+app.use(`${API_PREFIX}/admin-log`, adminLogRouter);
 
 const PORT = Number(process.env.PORT) || 3001;
 

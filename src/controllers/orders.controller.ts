@@ -253,7 +253,7 @@ export async function softDeleteOrderController(
       return;
     }
 
-    const order = await softDeleteOrder(id);
+    const order = await softDeleteOrder(id, req.admin?.adminId ?? null);
     res.status(200).json({
       success: true,
       message: "Order soft deleted",
@@ -279,7 +279,7 @@ export async function hardDeleteOrderController(
       return;
     }
 
-    const result = await hardDeleteOrder(id);
+    const result = await hardDeleteOrder(id, req.admin?.adminId ?? null);
     res.status(200).json({
       success: true,
       message: "Order hard deleted",

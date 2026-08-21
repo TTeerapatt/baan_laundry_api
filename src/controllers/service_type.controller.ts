@@ -90,6 +90,7 @@ export async function createServiceTypeController(
     const serviceType = await createServiceType({
       code: req.body?.code,
       name: req.body?.name,
+      adminId: req.admin?.adminId ?? null,
     });
 
     res.status(201).json({
@@ -119,6 +120,7 @@ export async function updateServiceTypeController(
     const serviceType = await updateServiceType(id, {
       code: req.body?.code,
       name: req.body?.name,
+      adminId: req.admin?.adminId ?? null,
     });
 
     res.status(200).json({
@@ -145,7 +147,10 @@ export async function softDeleteServiceTypeController(
       return;
     }
 
-    const serviceType = await softDeleteServiceType(id);
+    const serviceType = await softDeleteServiceType(
+      id,
+      req.admin?.adminId ?? null
+    );
     res.status(200).json({
       success: true,
       message: "Service type soft deleted",
@@ -171,7 +176,10 @@ export async function hardDeleteServiceTypeController(
       return;
     }
 
-    const result = await hardDeleteServiceType(id);
+    const result = await hardDeleteServiceType(
+      id,
+      req.admin?.adminId ?? null
+    );
     res.status(200).json({
       success: true,
       message: "Service type hard deleted",

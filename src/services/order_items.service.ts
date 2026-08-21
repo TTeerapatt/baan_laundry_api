@@ -1,4 +1,5 @@
 import pool from "../config/database.config";
+import { insertAdminLog } from "./admin_log.service";
 import {
   OrderError,
   insertOrderLog,
@@ -140,6 +141,16 @@ export async function createOrderItem(
       action: "item_add",
       message: `Added order item ${inserted.rows[0].id}`,
     });
+    await insertAdminLog(
+      {
+        adminId: input.adminId,
+        action: "create",
+        entityType: "order_item",
+        entityId: Number(inserted.rows[0].id),
+        message: `Created order item ${inserted.rows[0].id}`,
+      },
+      client
+    );
 
     await client.query("COMMIT");
     return inserted.rows[0];
@@ -238,6 +249,16 @@ export async function updateOrderItem(
       action: "item_update",
       message: `Updated order item ${id}`,
     });
+    await insertAdminLog(
+      {
+        adminId: input.adminId,
+        action: "update",
+        entityType: "order_item",
+        entityId: id,
+        message: `Updated order item ${id}`,
+      },
+      client
+    );
 
     await client.query("COMMIT");
     return updated.rows[0];
@@ -280,6 +301,16 @@ export async function softDeleteOrderItem(
       action: "item_delete",
       message: `Soft deleted order item ${id}`,
     });
+    await insertAdminLog(
+      {
+        adminId,
+        action: "soft_delete",
+        entityType: "order_item",
+        entityId: id,
+        message: `Soft deleted order item ${id}`,
+      },
+      client
+    );
 
     await client.query("COMMIT");
     return updated.rows[0];
@@ -316,6 +347,16 @@ export async function hardDeleteOrderItem(
       action: "item_hard_delete",
       message: `Hard deleted order item ${id}`,
     });
+    await insertAdminLog(
+      {
+        adminId,
+        action: "hard_delete",
+        entityType: "order_item",
+        entityId: id,
+        message: `Hard deleted order item ${id}`,
+      },
+      client
+    );
 
     await client.query("COMMIT");
     return { id };

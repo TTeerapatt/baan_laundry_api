@@ -100,6 +100,7 @@ export async function createUserController(
       phone: req.body?.phone,
       name: req.body?.name,
       note: req.body?.note,
+      adminId: req.admin?.adminId ?? null,
     });
 
     res.status(201).json({
@@ -130,6 +131,7 @@ export async function updateUserController(
       phone: req.body?.phone,
       name: req.body?.name,
       note: req.body?.note,
+      adminId: req.admin?.adminId ?? null,
     });
 
     res.status(200).json({
@@ -156,7 +158,7 @@ export async function softDeleteUserController(
       return;
     }
 
-    const user = await softDeleteUser(id);
+    const user = await softDeleteUser(id, req.admin?.adminId ?? null);
     res.status(200).json({
       success: true,
       message: "User soft deleted",
@@ -182,7 +184,7 @@ export async function hardDeleteUserController(
       return;
     }
 
-    const result = await hardDeleteUser(id);
+    const result = await hardDeleteUser(id, req.admin?.adminId ?? null);
     res.status(200).json({
       success: true,
       message: "User hard deleted",

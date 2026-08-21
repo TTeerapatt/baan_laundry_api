@@ -1,4 +1,5 @@
 import pool from "../config/database.config";
+import { insertAdminLog } from "./admin_log.service";
 
 export interface ListPriceListItem {
   id: number;
@@ -13,12 +14,14 @@ export interface CreateListPriceInput {
   service_type_id: number;
   list_type_id: number;
   unit_price: number;
+  adminId?: number | null;
 }
 
 export interface UpdateListPriceInput {
   service_type_id?: number;
   list_type_id?: number;
   unit_price?: number;
+  adminId?: number | null;
 }
 
 export class ListPriceError extends Error {
@@ -150,7 +153,16 @@ export async function createListPrice(
     [serviceTypeId, listTypeId, unitPrice]
   );
 
-  return result.rows[0];
+  const listPrice = result.rows[0];
+  await insertAdminLog({
+    adminId: input.adminId,
+    action: "create",
+    entityType: "list_price",
+    entityId: Number(listPrice.id),
+    message: `Created list price ${listPrice.id}`,
+  });
+
+  return listPrice;
 }
 
 export async function updateListPrice(
@@ -192,11 +204,20 @@ export async function updateListPrice(
     [nextServiceTypeId, nextListTypeId, nextUnitPrice, id]
   );
 
+  await insertAdminLog({
+    adminId: input.adminId,
+    action: "update",
+    entityType: "list_price",
+    entityId: id,
+    message: `Updated list price ${id}`,
+  });
+
   return result.rows[0];
 }
 
 export async function softDeleteListPrice(
-  id: number
+  id: number,
+  adminId?: number | null
 ): Promise<ListPriceListItem> {
   const result = await pool.query<ListPriceListItem>(
     `
@@ -213,11 +234,20 @@ export async function softDeleteListPrice(
     throw new ListPriceError(404, "List price not found");
   }
 
+  await insertAdminLog({
+    adminId,
+    action: "soft_delete",
+    entityType: "list_price",
+    entityId: id,
+    message: `Soft deleted list price ${id}`,
+  });
+
   return result.rows[0];
 }
 
 export async function hardDeleteListPrice(
-  id: number
+  id: number,
+  adminId?: number | null
 ): Promise<{ id: number }> {
   const client = await pool.connect();
 
@@ -237,6 +267,17 @@ export async function hardDeleteListPrice(
       [id]
     );
     await client.query(`DELETE FROM list_price WHERE id = $1`, [id]);
+
+    await insertAdminLog(
+      {
+        adminId,
+        action: "hard_delete",
+        entityType: "list_price",
+        entityId: id,
+        message: `Hard deleted list price ${id}`,
+      },
+      client
+    );
 
     await client.query("COMMIT");
     return { id };
