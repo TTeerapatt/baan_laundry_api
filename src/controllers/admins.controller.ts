@@ -1,8 +1,10 @@
 import type { Request, Response, NextFunction } from "express";
 import {
   AdminError,
+  createAdminByAdmin,
   getActiveAdminById,
   getActiveAdmins,
+  getAdminPermissionsById,
   hardDeleteAdmin,
   softDeleteAdmin,
   updateAdmin,
@@ -44,6 +46,30 @@ export async function getAdminsController(
     });
   } catch (error) {
     next(error);
+  }
+}
+
+export async function createAdminController(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const admin = await createAdminByAdmin({
+      email: req.body?.email,
+      password: req.body?.password,
+      display_name: req.body?.display_name,
+      role: req.body?.role,
+      permissions: req.body?.permissions,
+      adminId: req.admin?.adminId ?? null,
+    });
+
+    res.status(201).json({
+      success: true,
+      data: admin,
+    });
+  } catch (error) {
+    handleAdminError(error, res, next);
   }
 }
 
@@ -100,12 +126,38 @@ export async function updateAdminController(
       display_name: req.body?.display_name,
       role: req.body?.role,
       password: req.body?.password,
+      permissions: req.body?.permissions,
       adminId: req.admin?.adminId ?? null,
     });
 
     res.status(200).json({
       success: true,
       data: admin,
+    });
+  } catch (error) {
+    handleAdminError(error, res, next);
+  }
+}
+
+export async function getAdminPermissionsByIdController(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const id = parseIdParam(req.params.id);
+    if (id === null) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid id",
+      });
+      return;
+    }
+
+    const data = await getAdminPermissionsById(id);
+    res.status(200).json({
+      success: true,
+      data,
     });
   } catch (error) {
     handleAdminError(error, res, next);

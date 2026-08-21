@@ -202,6 +202,22 @@
       "name": "Admins",
       "item": [
         {
+          "name": "POST Create Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"staff1@baanlaundry.com\",\n  \"password\": \"123456\",\n  \"display_name\": \"Staff 1\",\n  \"role\": \"staff\",\n  \"permissions\": [\n    {\n      \"tab_code\": \"customers\",\n      \"action_codes\": [\"view\", \"edit\"]\n    },\n    {\n      \"tab_code\": \"list-prices\",\n      \"action_codes\": [\"view\"]\n    }\n  ]\n}"
+            },
+            "url": { "raw": "{{base_url}}/admins", "host": ["{{base_url}}"], "path": ["admins"] }
+          },
+          "response": []
+        },
+        {
           "name": "GET All Admins",
           "request": {
             "method": "GET",
@@ -224,6 +240,17 @@
           "response": []
         },
         {
+          "name": "GET Admin Permissions By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/admins/{{admin_id}}/permissions", "host": ["{{base_url}}"], "path": ["admins", "{{admin_id}}", "permissions"] }
+          },
+          "response": []
+        },
+        {
           "name": "PUT Update Admin",
           "request": {
             "method": "PUT",
@@ -233,7 +260,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@baanlaundry.com\",\n  \"display_name\": \"Admin Updated\",\n  \"role\": \"admin\",\n  \"password\": \"123456\"\n}"
+              "raw": "{\n  \"email\": \"admin@baanlaundry.com\",\n  \"display_name\": \"Admin Updated\",\n  \"role\": \"admin\",\n  \"password\": \"123456\",\n  \"permissions\": [\n    {\n      \"tab_code\": \"customers\",\n      \"action_codes\": [\"view\", \"add\", \"edit\", \"delete\"]\n    },\n    {\n      \"tab_code\": \"admins\",\n      \"action_codes\": [\"view\"]\n    }\n  ]\n}"
             },
             "url": { "raw": "{{base_url}}/admins/{{admin_id}}", "host": ["{{base_url}}"], "path": ["admins", "{{admin_id}}"] }
           },
