@@ -38,16 +38,21 @@ export async function getUsersController(
   next: NextFunction
 ): Promise<void> {
   try {
-    const phoneRaw = req.query.phone;
-    const phone = Array.isArray(phoneRaw)
-      ? phoneRaw[0] !== undefined
-        ? String(phoneRaw[0])
-        : undefined
-      : phoneRaw !== undefined
-        ? String(phoneRaw)
-        : undefined;
+    const firstQueryValue = (value: unknown): string | undefined => {
+      if (Array.isArray(value)) {
+        return value[0] !== undefined ? String(value[0]) : undefined;
+      }
+      if (value === undefined || value === null) {
+        return undefined;
+      }
+      return String(value);
+    };
 
-    const users = await getActiveUsers({ phone });
+    const users = await getActiveUsers({
+      phone: firstQueryValue(req.query.phone),
+      name: firstQueryValue(req.query.name),
+      q: firstQueryValue(req.query.q),
+    });
     res.status(200).json({
       success: true,
       data: users,

@@ -29,6 +29,9 @@ export class UserError extends Error {
 
 export interface ListUsersFilter {
   phone?: string;
+  name?: string;
+  /** ค้นทั้งเบอร์และชื่อแบบ contains */
+  q?: string;
 }
 
 export async function getActiveUsers(
@@ -37,10 +40,24 @@ export async function getActiveUsers(
   const conditions: string[] = ["deleted_at IS NULL"];
   const params: unknown[] = [];
 
-  const phone = filter.phone?.trim();
-  if (phone) {
-    params.push(phone);
-    conditions.push(`phone = $${params.length}`);
+  const q = filter.q?.trim();
+  if (q) {
+    params.push(`%${q}%`);
+    conditions.push(
+      `(phone ILIKE $${params.length} OR name ILIKE $${params.length})`
+    );
+  } else {
+    const phone = filter.phone?.trim();
+    if (phone) {
+      params.push(`%${phone}%`);
+      conditions.push(`phone ILIKE $${params.length}`);
+    }
+
+    const name = filter.name?.trim();
+    if (name) {
+      params.push(`%${name}%`);
+      conditions.push(`name ILIKE $${params.length}`);
+    }
   }
 
   const result = await pool.query<UserListItem>(
