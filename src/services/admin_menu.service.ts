@@ -10,6 +10,12 @@ export interface AdminMenuLabelListItem {
   updated_at: string;
 }
 
+export interface AdminMenuTabActionItem {
+  code: string;
+  name: string;
+  sort_order: number;
+}
+
 export interface AdminMenuTabListItem {
   id: number;
   menu_label_id: number;
@@ -21,6 +27,7 @@ export interface AdminMenuTabListItem {
   sort_order: number;
   created_at: string;
   updated_at: string;
+  actions: AdminMenuTabActionItem[];
 }
 
 export interface AdminMenuResponse {
@@ -43,7 +50,7 @@ export async function getAdminMenuLabels(): Promise<AdminMenuLabelListItem[]> {
 }
 
 export async function getAdminMenuTabs(): Promise<AdminMenuTabListItem[]> {
-  const result = await pool.query<AdminMenuTabListItem>(
+  const result = await pool.query<Omit<AdminMenuTabListItem, "actions">>(
     `
       SELECT
         t.id,
@@ -65,7 +72,44 @@ export async function getAdminMenuTabs(): Promise<AdminMenuTabListItem[]> {
     `
   );
 
-  return result.rows;
+  const actionResult = await pool.query<{
+    menu_tab_id: number;
+    code: string;
+    name: string;
+    sort_order: number;
+  }>(
+    `
+      SELECT
+        mta.menu_tab_id,
+        pa.code,
+        pa.name,
+        pa.sort_order
+      FROM admin_menu_tab_action mta
+      INNER JOIN admin_permission_action pa
+        ON pa.id = mta.permission_action_id
+       AND pa.deleted_at IS NULL
+       AND pa.is_active = TRUE
+      WHERE mta.deleted_at IS NULL
+      ORDER BY pa.sort_order ASC, pa.id ASC
+    `
+  );
+
+  const actionsByTabId = new Map<number, AdminMenuTabActionItem[]>();
+  for (const row of actionResult.rows) {
+    const tabId = Number(row.menu_tab_id);
+    const list = actionsByTabId.get(tabId) ?? [];
+    list.push({
+      code: row.code,
+      name: row.name,
+      sort_order: Number(row.sort_order),
+    });
+    actionsByTabId.set(tabId, list);
+  }
+
+  return result.rows.map((tab) => ({
+    ...tab,
+    actions: actionsByTabId.get(Number(tab.id)) ?? [],
+  }));
 }
 
 export async function getAdminMenuAll(): Promise<AdminMenuResponse> {
