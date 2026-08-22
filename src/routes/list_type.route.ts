@@ -15,37 +15,37 @@ const listTypeRouter = Router();
 listTypeRouter.post(
   "/",
   authMiddleware,
-  requirePermission("list-prices", "add"),
+  requirePermission("list-types", "add"),
   createListTypeController
 );
 listTypeRouter.get(
   "/",
   authMiddleware,
-  requirePermission("list-prices", "view"),
+  requirePermission("list-types", "view"),
   getListTypesController
 );
 listTypeRouter.get(
   "/:id",
   authMiddleware,
-  requirePermission("list-prices", "view"),
+  requirePermission("list-types", "view"),
   getListTypeByIdController
 );
 listTypeRouter.put(
   "/:id",
   authMiddleware,
-  requirePermission("list-prices", "edit"),
+  requirePermission("list-types", "edit"),
   updateListTypeController
 );
 listTypeRouter.delete(
   "/:id/hard",
   authMiddleware,
-  requirePermission("list-prices", "delete"),
+  requirePermission("list-types", "delete"),
   hardDeleteListTypeController
 );
 listTypeRouter.delete(
   "/:id",
   authMiddleware,
-  requirePermission("list-prices", "delete"),
+  requirePermission("list-types", "delete"),
   softDeleteListTypeController
 );
 

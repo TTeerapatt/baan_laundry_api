@@ -597,8 +597,9 @@ FROM (
     ('management', 'orders', 'ออเดอร์', 0),
     ('management', 'customers', 'ลูกค้า', 1),
     ('management', 'service-types', 'ประเภทบริการ', 2),
-    ('management', 'list-prices', 'ราคาบริการ', 3),
-    ('management', 'admins', 'ผู้ดูแลระบบ', 4),
+    ('management', 'list-types', 'ประเภทรายการ', 3),
+    ('management', 'list-prices', 'ราคาบริการ', 4),
+    ('management', 'admins', 'ผู้ดูแลระบบ', 5),
     ('activity-history', 'order_log', 'ประวัติออเดอร์', 1),
     ('activity-history', 'admin_log', 'ประวัติแอดมิน', 2)
 ) AS seed(label_code, code, name, sort_order)
@@ -724,6 +725,11 @@ FROM (
     ('service-types', 'edit'),
     ('service-types', 'delete'),
     ('service-types', 'export'),
+    ('list-types', 'view'),
+    ('list-types', 'add'),
+    ('list-types', 'edit'),
+    ('list-types', 'delete'),
+    ('list-types', 'export'),
     ('list-prices', 'view'),
     ('list-prices', 'add'),
     ('list-prices', 'edit'),
