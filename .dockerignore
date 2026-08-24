@@ -1,0 +1,13 @@
+node_modules
+dist
+.git
+.gitignore
+.env
+.env.*
+*.md
+postman_collection.json
+Dockerfile
+.dockerignore
+npm-debug.log*
+.DS_Store
+upload
