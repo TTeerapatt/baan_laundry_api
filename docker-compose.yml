@@ -10,21 +10,21 @@ services:
       - "${API_PORT:-3001}:3001"
     environment:
       NODE_ENV: production
-      PORT: 3001
-      DATABASE_URL: ${DATABASE_URL}
+      PORT: ${PORT:-3001}
+      # ถ้ามี DATABASE_URL จะถูกใช้ก่อน (password ที่มี # ต้อง encode เป็น %23)
+      DATABASE_URL: ${DATABASE_URL:-}
+      DB_HOST: ${DB_HOST:-187.52.125.210}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASS: ${DB_PASS:-}
+      DB_NAME: ${DB_NAME:-baan_laundry}
       JWT_SECRET: ${JWT_SECRET}
       # frontend admin บน VPS — คั่นด้วย comma ได้ถ้ามีหลาย origin
       CORS_ORIGIN: ${CORS_ORIGIN:-http://187.52.125.210:3000}
-      DB_HOST: ${DB_HOST:-}
-      DB_PORT: ${DB_PORT:-5432}
-      DB_USER: ${DB_USER:-}
-      DB_PASS: ${DB_PASS:-}
-      DB_NAME: ${DB_NAME:-}
     volumes:
-      # เก็บไฟล์อัปโหลดข้าม container recreate
       - api_upload:/app/upload
     extra_hosts:
-      # ให้ container เรียก Postgres บน host VPS ผ่าน host.docker.internal ได้
+      # สำรองไว้กรณีอยากใช้ host.docker.internal แทน IP สาธารณะ
       - "host.docker.internal:host-gateway"
     healthcheck:
       test:
@@ -32,7 +32,7 @@ services:
           "CMD",
           "node",
           "-e",
-          "fetch('http://127.0.0.1:3001/laundry/api/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+          "fetch('http://127.0.0.1:'+(process.env.PORT||3001)+'/laundry/api/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
         ]
       interval: 30s
       timeout: 5s

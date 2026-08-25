@@ -25,12 +25,37 @@ pipeline {
     )
     string(
       name: 'DATABASE_URL',
-      defaultValue: 'postgres://postgres:root@host.docker.internal:5432/baan_laundry',
-      description: 'Connection string ของ PostgreSQL (ใช้ host.docker.internal ถ้า DB อยู่บน host VPS)'
+      defaultValue: 'postgres://postgres:CHANGE_ME@187.52.125.210:5432/baan_laundry',
+      description: 'Connection string ของ PostgreSQL (ถ้า password มี # ให้ใส่เป็น %23)'
+    )
+    string(
+      name: 'DB_HOST',
+      defaultValue: '187.52.125.210',
+      description: 'ใช้เมื่อไม่ใส่ DATABASE_URL'
+    )
+    string(
+      name: 'DB_PORT',
+      defaultValue: '5432',
+      description: 'พอร์ต Postgres'
+    )
+    string(
+      name: 'DB_USER',
+      defaultValue: 'postgres',
+      description: 'user Postgres'
+    )
+    password(
+      name: 'DB_PASS',
+      defaultValue: '0946987087Notkz#',
+      description: 'รหัสผ่าน Postgres (ใช้เมื่อไม่พึ่ง DATABASE_URL หรือเป็นค่าสำรอง)'
+    )
+    string(
+      name: 'DB_NAME',
+      defaultValue: 'baan_laundry',
+      description: 'ชื่อ database'
     )
     password(
       name: 'JWT_SECRET',
-      defaultValue: '',
+      defaultValue: 'CHicNaFWTEhJz0bT4O6xqDvX428f3J3bMi5giXWbSqU',
       description: 'JWT secret สำหรับเซ็น token (จำเป็นต้องใส่)'
     )
   }
@@ -39,8 +64,14 @@ pipeline {
     COMPOSE_PROJECT_NAME = 'baan-laundry-api'
     IMAGE_NAME = 'baan-laundry-api'
     API_PORT = "${params.API_PORT}"
+    PORT = "${params.API_PORT}"
     CORS_ORIGIN = "${params.CORS_ORIGIN}"
     DATABASE_URL = "${params.DATABASE_URL}"
+    DB_HOST = "${params.DB_HOST}"
+    DB_PORT = "${params.DB_PORT}"
+    DB_USER = "${params.DB_USER}"
+    DB_PASS = "${params.DB_PASS}"
+    DB_NAME = "${params.DB_NAME}"
     JWT_SECRET = "${params.JWT_SECRET}"
   }
 
@@ -59,8 +90,15 @@ pipeline {
             echo "JWT_SECRET is required"
             exit 1
           fi
-          if [ -z "${DATABASE_URL}" ]; then
-            echo "DATABASE_URL is required"
+
+          has_url=0
+          case "${DATABASE_URL}" in
+            ""|"postgres://postgres:CHANGE_ME@"*) has_url=0 ;;
+            *) has_url=1 ;;
+          esac
+
+          if [ "${has_url}" -eq 0 ] && [ -z "${DB_PASS}" ]; then
+            echo "Provide a real DATABASE_URL (encode # as %23) or set DB_PASS"
             exit 1
           fi
         '''
@@ -72,8 +110,14 @@ pipeline {
         sh '''
           set -e
           export API_PORT="${API_PORT}"
+          export PORT="${PORT}"
           export CORS_ORIGIN="${CORS_ORIGIN}"
           export DATABASE_URL="${DATABASE_URL}"
+          export DB_HOST="${DB_HOST}"
+          export DB_PORT="${DB_PORT}"
+          export DB_USER="${DB_USER}"
+          export DB_PASS="${DB_PASS}"
+          export DB_NAME="${DB_NAME}"
           export JWT_SECRET="${JWT_SECRET}"
           docker compose build api
         '''
@@ -88,8 +132,14 @@ pipeline {
         sh '''
           set -e
           export API_PORT="${API_PORT}"
+          export PORT="${PORT}"
           export CORS_ORIGIN="${CORS_ORIGIN}"
           export DATABASE_URL="${DATABASE_URL}"
+          export DB_HOST="${DB_HOST}"
+          export DB_PORT="${DB_PORT}"
+          export DB_USER="${DB_USER}"
+          export DB_PASS="${DB_PASS}"
+          export DB_NAME="${DB_NAME}"
           export JWT_SECRET="${JWT_SECRET}"
           docker compose up -d --remove-orphans api
         '''
